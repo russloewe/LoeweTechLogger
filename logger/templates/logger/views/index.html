@@ -1,0 +1,13 @@
+{% extends "logger/comps/base.html" %}
+
+{% block content1 %}
+<div class="col ">
+{% if patients %}
+  {% for patient in patients %}
+      {% include "logger/comps/patientCard.html"  %}
+  {% endfor %}
+{% else %}
+{% include "logger/about.html" %}
+{% endif %}
+</div>
+{% endblock %}

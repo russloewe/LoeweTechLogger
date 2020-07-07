@@ -1,0 +1,30 @@
+{% extends "logger/comps/base.html" %}
+
+{% block content1 %}
+<!-- Form for changing Log values -->
+
+<script>
+$(function() {
+$( "#time" ).datepicker();
+});
+</script>
+<form action="{% url 'logger:LogUpdateView' log_id %}" 
+method="post"
+class="p-2 list-group">
+{% csrf_token %}
+  <div class="bg-light"> 
+    <div class="d-flex flex-column">
+    {{ form.as_div }}
+    </div>
+      <!-- Submit Button -->
+      <div class="form-row">
+        <input class="btn btn-primary m-3" type="submit" value="save">
+        <a class="btn btn-secondary m-3" href="{% url 'logger:LogView' log_id %}">Back</a>
+      </div><!-- //Submit Button -->
+  </div><!-- //container -->
+</form>
+
+
+
+
+{% endblock %}

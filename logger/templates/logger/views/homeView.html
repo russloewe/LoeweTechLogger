@@ -1,0 +1,38 @@
+{% extends "logger/comps/base.html" %}
+
+{% block content1 %}
+<div class="col mx-auto ">
+<h2 class="text-white">Patients:</h2>
+</div>
+{% endblock %}
+
+{% block content2 %}
+{% if patients %}
+<div class="col ">
+  {% for patient in patients %}
+  <!-- Patient Row -->
+    <div class=" card bg-light rounded">
+        <!-- Name -->
+        <div class="mx-auto row">
+            <a href="{% url 'logger:PatientView' patient.id %}"
+               class="btn btn-lrg">
+                <h3>{{patient.first_name}} {{patient.last_name}}</h3> 
+            </a>
+        </div>
+        <!-- Stats -->
+        <div class="row">
+            <ul>
+              <li>Last BG log -> {{patient.lastBloodsugar.date}} : {{patient.lastBloodsugar.bloodsugar}} </li>
+              <li>Last Insulin log -> {{patient.lastInsulin.date}} : {{patient.lastInsulin.insulin}} </li>
+              <li>Last Basal log -> {{patient.lastBasal.date}} : {{patient.lastBasal.basal}} </li>
+            </ul>
+        </div>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="col bg-light">
+  <h4> No Patients </h4>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,184 @@
+
+<form action="{% url 'logger:PatientView' patient.id %}" 
+      method="post"
+      class="p-2 list-group",
+      id="addForm">
+{% csrf_token %}
+
+<div class="d-flex flex-column container  bg-light"> 
+  <h3 class="text-center"> New Log</h3>
+        <!-- DateTime -->    
+        <div class="d-flex flex-row">
+                <h4>Time:</h4>
+                <div class="col " id="datetime">
+                     {{ form.datetime }}
+                    {{ form.datetime.errors}}
+                </div>
+        </div><!-- DateTime -->
+
+        <!-- Bloodsugar -->
+      <div class="d-flex flex-row input-group input-group-lg p-2">
+          <div class="d-flex">
+              <div class="input-group ">
+                  <div class="input-group-prepend">
+                      <div class="input-group-text">Bloodsugar:</div>
+                  </div>
+                  {{form.bloodsugar}}
+                  {{ form.bloodsugar.errors}}
+              </div>
+          </div>
+      </div>
+      <!-- //Bloodsugar -->
+
+        <!-- Carbs -->
+        <div class="d-flex flex-row input-group input-group-lg p-2 ">
+          <div class="d-flex">
+              <div class="input-group">
+                  <div class="input-group-prepend">
+                      <div class="input-group-text">Carbs:</div>
+                  </div>
+                  {{form.carbs}}
+                  {{form.carbs.errors}}
+              </div>
+          </div>
+      </div>
+      <!-- //Carbs -->
+
+      <!-- Insulin -->
+      <div class="d-flex flex-row input-group input-group-lg p-2">
+          <div class="d-flex">
+              <div class="input-group">
+                  <div class="input-group-prepend">
+                      <div class="input-group-text">Insulin:</div>
+                  </div>
+                  {{ form.insulin }}
+                  {{ form.insulin.errors }}
+              </div>
+          </div>
+      </div>
+      <!-- //Insulin -->
+        
+        <!-- Helper Header -->
+        <div class="d-flex flex-row border-top">
+            <h6>Insulin math helper:</h6>
+        </div>
+        <!-- Helper boxes --> 
+        <div class="d-flex flex-row border-bottom">
+            <!-- BG Helper -->
+            <div class="small-input m-1">
+                <input class="form-control "
+                    id="bloodsugar-helper"
+                    type="text"
+                    style="background: #ffaaaa;"
+                    placeholder="BG"
+                    disabled
+                    readonly>
+            </div><!-- //BG Helper -->
+            
+            <!-- Plus sign -->
+            <div class="m-1">
+                <span class="btn btn-lrg border">+</span>
+            </div>
+            
+            <!-- Carbs Helper-->
+            <div class="small-input m-1">
+                <input class="form-control"
+                    id="carbs-helper"
+                    type="text"
+                    style="background: #aaffaa;"
+                    placeholder="C"
+                    disabled
+                    readonly>
+            </div><!-- //Carbs Helper-->
+            
+            <!-- Equals sign -->
+            <div class="m-1">
+                <span class="btn btn-lrg border">=</span>
+            </div>
+            
+            <!-- Insulin Helper -->
+            <div class="small-input m-1">
+                <input class="form-control"
+                    id="insulin-helper"
+                    type="text"
+                    style="background: #aaaaff"
+                    placeholder="IN"
+                    disabled
+                    readonly>
+
+            </div><!-- //Insulin Helper-->
+        </div><!-- //Helper -->
+
+<!-- Error card goes here -->
+{% if form.errors %}
+<div class="card">
+    <div class="card-head">
+        <h5>Errors!</h5>
+    </div>
+    <div class="card-body">
+    {% for field in form %}
+        {% for error in field.errors %}
+            <div class="alert alert-danger">
+                <p> {{field}} </p>
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% for error in form.non_field_errors %}
+        <div class="alert alert-danger">
+            <strong>{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+       <!-- Submit Button -->
+        <div class="form-row">
+          <div>
+            <a href="#" class="btn text-light btn-primary m-3" data-toggle="modal" data-target="#AddModal">Save</a>
+          </div>
+          <div class="col">
+            <!-- Basaglar Slider -->
+                <div class="custom-control custom-switch">
+                  {{form.basalcheck}}
+                  <label class="custom-control-label" for="id_basalcheck">Basaglar</label>
+              </div>
+            </div>
+            <div class="col collapse" id="bas">
+                {{form.basal}}
+                </div>
+                <!-- End Slider-->
+            </div>
+        </div>
+        </div><!-- //Submit Button -->
+    </div><!-- //container -->
+</form>
+
+<!-- MODAL confirm save -->
+<div class="modal" tabindex="-1" id="AddModal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Form</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to continue?</p>
+      </div>
+      <div class="modal-footer">
+        <input
+            type="submit"
+        class="btn btn-primary m-3"
+        form="addForm"
+     value="save"
+        >
+        <button type="button" 
+                class="btn btn-secondary" 
+                data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

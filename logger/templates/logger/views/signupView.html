@@ -1,0 +1,23 @@
+{% extends "logger/comps/base.html" %}
+
+{% block content1 %}
+{% if form %}
+
+<form action="{% url 'logger:SignUpView' %}" 
+method="post"
+class="p-2 list-group">
+{% csrf_token %}
+  <div class="bg-light"> 
+    <div class="d-flex flex-column">
+    {{ form.as_div }}
+    </div>
+      <!-- Submit Button -->
+      <div class="form-row">
+        <input class="btn btn-primary m-3" type="submit" value="save">
+        <a class="btn btn-secondary m-3" href="{% url 'logger:LoginView' %}">Back</a>
+      </div><!-- //Submit Button -->
+  </div><!-- //container -->
+{% else %}
+<p> Thanks!</p>
+{% endif %}
+{% endblock %}

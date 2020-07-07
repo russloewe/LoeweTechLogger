@@ -1,0 +1,70 @@
+<!-- Quick stats -->
+
+        <li class="list-group-item">
+        <!-- Quick stats -->
+        <div class="row">
+            <!-- Log required fields -->
+            <div class="col text-align-center">
+                <!-- Date -->
+                <div class="row">
+                    <a class="btn btn-xs btn-info" href="{% url 'logger:LogView' log.id %}"><small>{{ log.date }}</small></a>
+                </div>
+
+            </div>
+            
+            <!-- Log optional fields -->
+            <div class="col d-flex flex-wrap">
+                <!-- Insulin -->
+                {% if log.insulin %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 rounded-left"
+                              style="background: #aaaaff">IN</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.insulin}}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!--  Carbs -->
+                {% if log.carbs %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 rounded-left"
+                              style="background: #aaffaa">C</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.carbs}}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Bloodsugar -->
+                {% if log.bloodsugar %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #ffaaaa">BG</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.bloodsugar}}</span>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- Basal -->
+                {% if log.basal %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #aaaaaa">BAS</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.basal}}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+            </div>
+        </div><!-- /Quick Stats -->
+    </li>

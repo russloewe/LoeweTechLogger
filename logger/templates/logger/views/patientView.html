@@ -1,0 +1,36 @@
+{% extends "logger/layout.html" %}
+
+
+{% block content1 %}
+{% if error_message %}
+{% include 'logger/comps/error.html'%}
+
+{% else %}
+
+<div class="col">
+    <div class="mx-auto">
+        <a href="{% url 'logger:PatientView' patient.id %}"
+           class="btn btn-lrg text-light">
+            <h3>{{patient.first_name}} {{patient.last_name}}</h3> 
+        </a>
+    </div>
+</div>
+
+
+{% include 'logger/comps/add.html' %}
+{% include 'logger/comps/graph.html' %}
+
+<div class="col">
+    <ul class="list-group">
+        <li class="list-group-item">
+            <h3 class="text-center">Recent Logs</h3>
+        </li>
+        {% for log in logs %}
+            {% include 'logger/comps/logStats.html' with log=log %}
+        {% endfor %}
+
+    </ul>
+    
+</div>
+{% endif %}
+{% endblock %}
