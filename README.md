@@ -7,27 +7,30 @@ A MVC logging web app for Type 1 Diabetes
 
 ## Install
 
-    add: 
+add: 
     
          path('logger/', include('logger.urls')),
 
-    to urls.py in app folder.
+to urls.py in app folder.
     
     
-    add:
+add:
     
         ./loewelogger.conf
         
-    to site-enabled apache2 folder. See comments in the logger for 
-    apach2 dependecies, but in short, install wsgi_mod with a2enmod
+to site-enabled apache2 folder. See comments in the logger for 
+apach2 dependecies, but in short, install wsgi_mod with a2enmod
+
+add:
+
+        ./logger 
+to a Django root folder. 
     
-    add ./logger to a Django root folder. 
-    
-    see:
+see:
     
         https://docs.djangoproject.com/en/3.0/intro/install/#
         
-    on how to get a Django web app installed.
+on how to get a Django web app installed.
     
 ## Dependencies
 
