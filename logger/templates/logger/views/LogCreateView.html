@@ -1,0 +1,23 @@
+{% extends "logger/base.html" %}
+
+{% block content %}
+<div class="card">
+
+    <div class="card-header border">
+        <h3>New Log</h3>
+    </div>
+    
+    <div class="card-body col-6 d-flex flex-column">
+        <form method="post" action="{% url 'logger:LogCreateView' patient.id %}">
+            {% csrf_token %}
+            {% include 'logger/comps/form_snippit.html' %}
+        </form>
+    </div>
+
+    <div class="footer">
+        <input class="btn btn-danger m-3" type="submit" value="Delete">
+        <a class='btn btn-secondary m-3' href="{% url 'logger:PatientView' patient.id %}">Back</a>
+    </div>
+    
+</div>
+{% endblock %}

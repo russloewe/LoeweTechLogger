@@ -21,58 +21,9 @@ from django.contrib.auth.models import User
 from .plots import ordinal
 # Create your models here.
 
-class PendingUser(models.Model):
-    first_name = models.CharField(max_length=40)
-    last_name = models.CharField(max_length=40)
-    email = models.CharField(max_length=100)
-
-    
-class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    patients = models.TextField(default='')
-    
-    def getPatients(self):
-      ''' Return array of patient objects'''
-      patients = self.getPatientIds()
-      pat_out = []
-      for patientid in patients:
-        pat_out.append(Patient.objects.get(id = patientid))
-      return(pat_out)
-      
-    def getPatientIds(self):
-        '''Return array of patient objects'''
-        if len(self.patients) > 0:
-            patients = self.patients.split(';')
-            test = lambda x : False if x == ' ' or x == '' else True
-            patients = [p for p in map(int, filter(test, patients))]
-            return(patients)
-        else:
-            return([])
-            
-    def addPatient(self, patientObj):
-        '''Add patient to user profile
-            returns false if user already in profile'''
-        patients = self.patients.split(';')
-        if patientObj.id not in patients:
-            patients.append(str(patientObj.id))
-            self.patients = ';'.join(patients)
-        else:
-            return(False)
-            
-    def removePatient(self, p):
-        ''' removes patient
-            Be sure to call '''
-        patients = self.patients.split(';')
-        patients.remove(str(p.id))
-        self.patients = ';'.join(patients)
-        
-        
-
-    def __str__(self):
-        return("{}".format(self.user))
-    
 class Patient(models.Model):
-    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name="owner")
+    connected = models.ManyToManyField(User, related_name="connected_users")
     dob = models.DateField('DOB')
     first_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=40)
@@ -123,8 +74,19 @@ class Patient(models.Model):
       data = []
       for log in logs:
         if(log.bloodsugar) and (log.bloodsugar > 0):
-          data.append((log.date, log.bloodsugar))
-      return(data)
+          data.append({'date': log.getJSDateTime(), 'value': log.bloodsugar})
+      return(data[-8:])
+
+    def getIN(self):
+      '''return insulin logs as data series'''
+      logs = self.log_set.order_by('date')
+      if logs == None or len(logs) < 1:
+        return(None)
+      data = []
+      for log in logs:
+        if(log.insulin) and (log.insulin > 0):
+          data.append({'date': log.getJSDateTime(), 'value': log.insulin})
+      return(data[-8:])
     
     def getLogs(self):
       ''' Return an array of all logs associated with patient
@@ -175,7 +137,8 @@ class Patient(models.Model):
         return None
         
 class Log(models.Model):
-    patient = models.ForeignKey('Patient', on_delete=models.CASCADE, default=2)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, default=2)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True)
     date = models.DateTimeField('timestamp')
     insulin = models.FloatField(default=0, null=True)
     carbs = models.FloatField(default=0, null=True)
@@ -184,6 +147,22 @@ class Log(models.Model):
     basal = models.FloatField(default=0, null=True)
     steps = models.FloatField(default=0, null=True)
     
+    def getJSDateTime(self):
+        '''
+            retun the datetime nicely formated for javascripts new Date
+            object.
+        '''
+        # Get values from datetime object on log
+        date = {'hour': self.date.hour,
+            'minute': self.date.minute,
+            'day': self.date.day,
+            'month': self.date.month-1,
+            'year': self.date.year,
+            'tzname': self.date.tzname(),
+            'timestamp': self.date.timestamp()*1000}
+        return date
+        
+        
     def setDateFromForm(self, date, time):
         '''
             Set the date attribute of this object from 

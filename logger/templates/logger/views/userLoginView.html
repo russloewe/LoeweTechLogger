@@ -1,16 +1,16 @@
 <!-- templates/registration/login.html -->
-{% extends "logger/comps/base.html" %}
+{% extends "logger/base.html" %}
 
 {% block userbox %}
 {% endblock %}
 
-{% block content1 %}
+{% block content %}
 
 <div class="col-lg-4 col-md-5 col-sm-5 col-xs-5 mx-auto">
 <div class="card mx-auto my-3">
     <article class="card-body">
         <!-- Sign up -->
-        <a href="{% url 'logger:PatientView' 1 %}" class="float-right btn btn-outline-primary">Demo Profile</a>
+        <a href="{% url 'logger:RegisterView' %}" class="float-right btn btn-outline-primary">Sign Up</a>
         <!-- Sign in -->
         <h4 class="card-title mb-4 mt-1">Sign in</h4>
          <form method="post" action="{% url 'logger:LoginView' %}">

@@ -10,11 +10,11 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', {{G_RECAPTCHA_CLIENT}});
+  gtag('config', 'UA-44408252-3');
 </script>
 
         <title>
-            {{title}}
+            {% if title %}{{title}}{% else %}LoeweTech Logger{% endif %}
         </title>
         <!-- Favicon -->
         <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
@@ -23,19 +23,17 @@
 
         <!-- JQUERY -->
         <script src="https://loewetechsoftware.com/static/jquery.min.js"></script>
-        
+      
         <!-- Chart.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
-        <script src="https://loewetechsoftware.com/static/chartutilis.js"></script>
-        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js" integrity="sha512-vBmx0N/uQOXznm/Nbkp7h0P1RfLSj0HQrFSzV8m7rOGyj30fYAOKHYvCNez+yM8IrfnW0TCodDEjRqf6fodf/Q==" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js" integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg==" crossorigin="anonymous"></script>
+        <script src="https://loewetechsoftware.com/static/chartjs-plugin-annotation.min.js"></script>
+
         <!-- BOOTSTRAP CDN -->
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
-        <script src="https://loewetechsoftware.com/static/math_healper.js" >
+        
         </script>
-        
-        
-        
         <!-- BOOTSTRAP TAGS -->
         <meta name="msapplication-TileColor" content="#da532c">
         <meta name="theme-color" content="#ffffff">
@@ -45,23 +43,47 @@
         <!-- OUR CSS -->
         <link href="https://loewetechsoftware.com/static/style.css" rel="stylesheet">
         
+        
+
     </head>
     <body class="bg-dark">
         
-        {% include 'logger/components/navbar.html' %}
+      <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-between text-light">
+        <div class="d-flex justify-content-between">
+          <a class="navbar-brand " href="{% url 'logger:index' %}">Home</a>
+        
+          {% block page_links %}{% endblock %}
+          {% if patient %}
+            <a class="nav-link text-light" href="{% url 'logger:PatientDetailView' patient.id%}">Patient Details</a>
+            <a class="nav-link text-light" href="{% url 'logger:PatientView' patient.id%}">Patient Dashboard</a>
+          {% endif %}
+        </div>
+        
+        
+        {% if request.user.is_authenticated %}   
+        <div class="d-flex justify-content-between text-light">
+          <a class="nav-link text-light" href="{% url 'logger:ProfileView' %}">My Profile</a>
+          <a class="nav-link text-light" href="{% url 'logger:PatientListView' %}">My Patients</a>
+          <a class="nav-link text-light" href="{% url 'logger:LogoutView' %}">Logout</a>
+        </div>
+    {% else %}
+        <div id="loginButton" class="m-0 p-1">
+            <a class="btn btn-light" href="{% url 'logger:LoginView' %}">Login</a>
+        </div>
+    {% endif %}
+        
+    </nav>
                         
         <div class="d-flex flex-column bg-dark border-top mx-auto py-5" >
           <!-- Beginining of View content -->
-            {% block content1 %}{% endblock %}
+            {% block content %}{% endblock %}
+
             <!-- End of View content -->
-       
         </div>
     </body>
-    
     <footer>
       <div class="col">
         <p class="text-white">Copyright Russell Loewe 2019</p>
       </div>
     </footer>
-    
 </html>

@@ -1,0 +1,58 @@
+
+
+<div class="row">
+    <div class="col-6">
+        <!-- Stats ordered list -->
+        <ul class="list-group">
+            
+            <!-- Patient -->
+            <li class="d-flex flex-row list-group-item">
+                <span class="col">Patient</span>
+                <span class="col">{{log.patient}}</span>
+            </li>
+
+            <!-- User -->
+            <li class="d-flex flex-row list-group-item">
+                <span class="col">User</span>
+                <span class="col">{{log.user.first_name}} {{log.user.last_name}} ({{log.user.username}})</span>
+            </li><!-- end User-->
+                
+            <!-- Date -->
+            <li class="d-flex flex-row list-group-item">
+                    <span class="col">Date</span>
+                    <span class="col">{{log.date}}</span>
+            </li>
+                
+            <!-- Insulin -->
+            <li class="d-flex flex-row list-group-item">
+                <span class="col">Insulin</span>
+                <span class="col">{{log.insulin}}</span>
+            </li>
+
+            <!-- Carbs --> 
+            <li class=" d-flex flex-row list-group-item">
+                <span class="col">Carbs</span>
+                <span class="col">{{log.carbs}}</span>
+            </li>
+
+            <!-- Bloodsugar -->
+            <li class="d-flex flex-row list-group-item">
+                <span class="col">BloodSugar</span>
+                <span class="col">{{log.bloodsugar}}</span>
+            </li>
+                
+            <!-- basal -->
+            <li class="d-flex flex-row list-group-item">
+                <span class="col">Basal</span>
+                <span class="col">{{log.basal}}</span>
+            </li>
+
+            <!-- Steps -->
+            <li class="d-flex flex-row list-group-item">
+                <span class="col">Steps</span>
+                <span class="col">{{log.steps}}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+    

@@ -1,26 +1,96 @@
-<div class="row">
-    <canvas id="myChart" width="100%" height="100px"></canvas>
+
+<div class="bg-light mb-3">
+    <div class="table-responsive">
+        <canvas id="myChart" style="height:400px" class="table"></canvas>
+    </div>
+
+    <button id="6hr_button" class="btn btn-sm btn-secondary m-1">6 hours</button>
+    <button id="12hr_button" class="btn btn-sm btn-secondary m-1">12 hours</button>
+    <button id="24hr_button" class="btn btn-sm btn-secondary m-1">24 hours</button>
 </div>
 
+
+
 <script>
-var config = {
-    type: 'line',
+    const duration_6hr = moment.duration("06:00:00");
+    const duration_12hr = moment.duration("12:00:00");
+    const duration_24hr = moment.duration("24:00:00");
+
+    var current_duration = duration_6hr;
+    var bgData = [
+        {% for data in bgData %}
+            {
+                x: moment(
+                    {{ data.date.timestamp}}
+                    ),
+                y: {{data.value}}
+            },
+        {% endfor %}
+    ];
     
+    var inData = [
+        {% for data in inData %}
+            {
+                x: moment(
+                    {{ data.date.timestamp}}
+                    ),
+                y: {{data.value}}
+            },
+        {% endfor %}
+    ];
+
+    var config = {
+
     data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
         datasets: [{
-            label: 'My First dataset',
+            label: 'Blood Sugar',
+            type: 'scatter',
             backgroundColor: 'red',
             borderColor: 'red',
-            data: [
-                10, 20, 30
-            ],
+            data: bgData,
             fill: false,
+            yAxisID: 'y-axis-0'
+        },{
+            label: 'Insulin',
+            type: 'bar',
+            backgroundColor: 'blue',
+            borderColor: 'blue',
+            data: inData,
+            borderColor: 'white',
+            borderWidth: 1,
+            yAxisID: 'y-axis-1'
         },]
     },
    
     options: {
-        responsive: true,
+        annotation: {
+            annotations: [{
+                type: 'box',
+                drawTime: 'beforeDatasetsDraw',
+                yScaleID: 'y-axis-0',
+                yMin: 0,
+                yMax: 80,
+                backgroundColor: 'rgba(255, 0, 0, 0.1)'
+            },
+            {
+                type: 'box',
+                drawTime: 'beforeDatasetsDraw',
+                yScaleID: 'y-axis-0',
+                yMin: 80,
+                yMax: 180,
+                backgroundColor: 'rgba(0, 255, 0, 0.1)'
+            },
+            {
+                type: 'box',
+                drawTime: 'beforeDatasetsDraw',
+                yScaleID: 'y-axis-0',
+                yMin: 180,
+                yMax: 500,
+                backgroundColor: 'rgba(255, 255, 0, 0.1)'
+            }]
+        },
+        responsive: false,
+        maintainAspectRatio: false,
         title: {
             display: true,
             text: 'Chart.js Line Chart'
@@ -38,30 +108,61 @@ var config = {
         
         scales: {
             xAxes: [{
-                display: true,
-                scaleLabel: {
-                display: true,
-                labelString: 'Month'
+                type: 'time',
+                time: {
+                    parser:  'MM/DD/YYYY HH:mm',
+                    unit: 'hour'
+                },
+                ticks:{
+                    max: moment(),
+                    min: moment().subtract(current_duration)
                 }
             }],
             yAxes: [{
+                id: 'y-axis-0',
                 display: true,
+                position: 'left',
                 scaleLabel: {
+                    display: true,
+                    labelString: 'Blood Sugar'
+                },
+                ticks: {
+                    beginAtZero: true,
+                    max: 400
+                }
+            },{
+                id: 'y-axis-1',
                 display: true,
-                labelString: 'Value'
+                position: 'right',
+                scaleLabel: {
+                    display: true,
+                    labelString: 'Insulin'
+                },
+                ticks: {
+                    beginAtZero: true,
+                    max: 20
                 }
             }]
         }
     }
 };
 
-window.onload = function() {
-    var ctx = document.getElementById('myChart').getContext('2d');
-    window.myLine = new Chart(ctx, config);
-};
+    window.onload = function() {
+        var ctx = document.getElementById('myChart').getContext('2d');
+        window.myLine = new Chart(ctx, config);
+    };
 
-});
-
-
-
-	</script>
+    document.getElementById('6hr_button').addEventListener('click', function() {
+        config.options.scales.xAxes[0].ticks.min = moment().subtract(duration_6hr);
+			window.myLine.update();
+		});
+    document.getElementById('12hr_button').addEventListener('click', function() {
+			config.options.scales.xAxes[0].ticks.min = moment().subtract(duration_12hr);
+			window.myLine.update();
+		});
+    document.getElementById('24hr_button').addEventListener('click', function() {
+			config.options.scales.xAxes[0].ticks.min = moment().subtract(duration_24hr);
+			window.myLine.update();
+		});
+</script>
+    

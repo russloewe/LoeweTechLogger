@@ -1,32 +1,24 @@
-{% extends 'logger/comps/base.html' %}
+{% extends 'logger/base.html' %}
 
-{% block userbox %}
-{% endblock %}
+
 {% block content %}
-<!-- Logout -->
-<div class="card mx-auto p-2">
-    <article class="card-body">
-        <h3 class="card-title">Are you sure you want to logout?</h3>
+<div class="card">   
+    
+    <div class="card-header border">
+        <h3>Logout?</h3>
+    </div>
+    
+    <div class="card-body col-6 d-flex flex-column">
+        <h2>Are you sure you want to log out?</h2>
+
+        <form method="post" action="{% url 'logger:PatientDeleteView' patient.id %}" >
+            {% csrf_token %}
+            <div class="form-row">
+                <input class="btn btn-danger m-3" type="submit" value="Logout">
+                <a class='btn btn-secondary m-3' href="{% url 'logger:index' %}">Back</a>
+            </div>
+        </form>
         
-        <div class="row ">
-            <!-- Logout button -->
-            <div class="col-xs-3 p-2 ">
-                <form method="POST"
-                      action="{% url 'logger:logout' %}">
-                {% csrf_token %}
-                    <div class="form-group ">
-                        <input class="form-control btn btn-secondary "
-                               type="submit" 
-                               value="Logout">
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Back button -->
-            <div class="col-xs-3 p-2">
-                <a class="btn btn-primary" href="{% url 'logger:index' %}">Home</a>
-            </div>
-        </div>
-    </article>
-</div><!-- //Logout -->
+    </div>   
+</div>
 {% endblock %}

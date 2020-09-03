@@ -1,13 +1,11 @@
-{% extends "logger/comps/base.html" %}
+{% extends "logger/base.html" %}
 
-{% block content1 %}
+{% block content %}
+{% include 'logger/comps/form_snippit.html' with form_action="{% url 'logger:LogCreateView' patient.id %}" 
+                                                 form_submit_text="Delete"
+                                                form_back="{% url 'logger:PatientView' patient.id %}" %}
 <!-- Form for changing Log values -->
 
-<script>
-$(function() {
-$( "#time" ).datepicker();
-});
-</script>
 <form action="{% url 'logger:LogUpdateView' log_id %}" 
 method="post"
 class="p-2 list-group">

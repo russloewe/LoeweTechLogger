@@ -1,0 +1,41 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+
+<div class="col pt-3">
+
+    {% include 'logger/comps/profile_card.html' %}
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <h2>My Patients:</h2>
+        </div>
+        <div class="card-body">
+            {% for patient in patients %}
+                {% include 'logger/comps/patient_snippit.html' with patient=patient %}
+            {% endfor %}
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'logger:PatientCreateView' %}"
+               class="btn btn-primary">
+                New Patient
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>My Connected Patients:</h2>
+        </div>
+        <div class="card-body">
+            {% for patient in connected_patients %}
+                {% include 'logger/comps/patient_snippit.html' with patient=patient %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

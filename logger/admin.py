@@ -14,9 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from django.contrib import admin
-from .models import Log, Patient, Profile, PendingUser
+from .models import Log, Patient
 # Register your models here.
 admin.site.register(Log)
 admin.site.register(Patient)
-admin.site.register(Profile)
-admin.site.register(PendingUser)
+

@@ -1,0 +1,29 @@
+
+<div class="card">
+    <div class="card-header">
+        <h2>{{patient.first_name}} {{patient.last_name}}</h2>
+    </div>
+    <div class="card-body">
+        {% include 'logger/comps/patient_card_snippit.html' %}
+    </div>
+    <div class="card-footer">
+
+        <a href="{% url 'logger:PatientUpdateView' patient.id %}"
+            class="btn btn-secondary m-3">
+            Edit Patient
+        </a>
+        
+        <a href="{% url 'logger:PatientLinkView' patient.id %}"
+           class="btn btn-secondary m-3">
+            Link Account
+        </a>
+        <a href="{% url 'logger:PatientUnlinkView' patient.id %}"
+           class="btn btn-secondary m-3">
+           Unlink Account
+        </a>
+        <a href="{% url 'logger:PatientDeleteView' patient.id %}"
+           class="btn btn-danger m-3">
+           Delete Patient
+        </a>
+    </div>
+</div>

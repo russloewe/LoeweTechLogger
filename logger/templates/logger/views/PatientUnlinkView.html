@@ -1,0 +1,23 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+<div class="card">
+
+    <div class="card-header border">
+        <h3>UnLink User Account</h3>
+    </div>
+    
+    <div class="card-body col-6 d-flex flex-column">
+
+        <form method="post" action="{% url 'logger:PatientUnlinkView' patient.id %}" >
+            {% include 'logger/comps/form_snippit.html' %}
+            <div class="row">
+                <input class="btn btn-primary m-3" type="submit" value="UnLink">
+                <a class='btn btn-secondary m-3' href="{% url 'logger:PatientDetailView' patient.id %}">Back</a>
+            </div>
+        </form>
+        
+    </div> 
+</div>
+{% endblock %}

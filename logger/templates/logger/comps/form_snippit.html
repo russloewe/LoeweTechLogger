@@ -1,0 +1,10 @@
+{% csrf_token %}
+{% if form.error %}
+    {% include 'logger/comps/form_error_card.html' %}
+{% endif %}
+{% for field in form %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+    </div>
+{% endfor %}

@@ -1,0 +1,34 @@
+<div class="row">
+    <div class="col-6">
+        <ul class="list-group">
+            <li class="list-group-item">
+                Birthday: {{patient.dob}}
+            </li>
+            <li class="list-group-item">
+                Basal insulin dose: {{patient.basal_dose}}
+            </li>
+            <li class="list-group-item">
+                Carb Ratio: {{patient.carb_ratio}} units/gram
+            </li>
+
+            <li class="list-group-item">
+                Correction Start: {{patient.correction_start}}
+            </li>
+            <li class="list-group-item">
+                Correction Step: {{ patient.correction_step }}
+            </li>
+            <li class="list-group-item">
+                User Account: {{ patient.user.username}}
+            </li>
+            <li class="list-group-item">
+                Connected Accounts: 
+                <ul>
+                    {% for user in patient.connected.all %}
+                        <li>{{user.username}}</li>
+                    {% endfor %}
+                </ul>
+                
+            </li>
+        </ul>
+    </div>
+</div>

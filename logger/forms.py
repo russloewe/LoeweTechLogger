@@ -15,6 +15,15 @@
 
 from django import forms
 
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from .models import Patient
+import datetime
+
+this_year = datetime.date.today().year
+BIRTH_YEAR_CHOICES = [ str(year) for year in range(this_year, this_year-99, -1)]
+
 class LogForm(forms.Form):
     datetime_attrs = {}
     bg_attrs = {'style':'background: #ffaaaa',
@@ -40,7 +49,10 @@ class LogForm(forms.Form):
                    'aria-controls': 'collapseBas'}
 
 
-    datetime = forms.DateTimeField(label="Log Datetime", required=True,
+    patient = forms.IntegerField(label="patient", 
+      widget=forms.HiddenInput())
+
+    datetime = forms.DateTimeField(label="Log Datetime", required=False,
       widget=forms.DateTimeInput(attrs=datetime_attrs))
     
     bloodsugar = forms.IntegerField(label="Bloodsugar", required=False,
@@ -74,20 +86,41 @@ class LogForm(forms.Form):
           help_text_html=' <span class="helptext">%s</span>',
           errors_on_separate_row=True,
       )
+
+class UserForm(forms.ModelForm):
+  class Meta:
+    model = User
+    fields = ['first_name', 'last_name', 'email']   
     
-    
-class PatientForm(forms.Form):
-    dob = forms.DateField(label="DOB")
-    first_name = forms.CharField(label='first name', max_length=100)
-    last_name = forms.CharField(label='last_name', max_length=100)
-    carb_ratio = forms. IntegerField(label="carb ratio")
-    correction_start = forms.IntegerField(label='correction start')
-    correction_step = forms.IntegerField(label='correction step')
-    basal_dose = forms.IntegerField(label='basal dose')
-    
-    
-class ProfileForm(forms.Form):
-  email = forms.EmailField(label = 'Email')
+class PatientForm(forms.ModelForm):
+  class Meta:
+    model = Patient
+    fields = ['dob', 'first_name', 'last_name', 'carb_ratio', 'correction_start', 'correction_step', 'basal_dose']
+    labels = {'dob': "Date of Birth"}
+    widgets = {'dob': forms.SelectDateWidget(years=BIRTH_YEAR_CHOICES)}
+
+class LinkUserForm(forms.Form):
+  username = forms.CharField(label = 'Username')
+  
+  def clean_username(self):
+    username = self.cleaned_data['username'].lower()
+    r = User.objects.filter(username=username)
+    if r.count() != 1:
+        raise  ValidationError("Username not found.")
+    return r[0]
+
+class UnlinkUserForm(forms.ModelForm):
+  def __init__(self, *args, **kwargs):
+    super(UnlinkUserForm, self).__init__(*args, **kwargs)
+    self.fields['connected'] = forms.ModelChoiceField(
+            queryset=self.instance.connected.all(),
+            label="Choose user account to disconnect:" )
+
+  class Meta:
+    model = Patient
+    fields = ['connected']
+
+ 
   
 class ImportForm(forms.Form):
   date_col = forms.CharField(label = 'date column', max_length = 50)
@@ -95,21 +128,55 @@ class ImportForm(forms.Form):
 class ExportForm(forms.Form):
   output = forms.CharField(label = 'output', max_length=50)
   
-class SignupForm(forms.Form):
-  email = forms.EmailField(label = 'Email')
-  first_name = forms.CharField(label="First Name")
-  last_name = forms.CharField(label="Last Name")
 
-  def as_div(self):
-    "Return this form rendered as HTML <div>s."
-    return self._html_output(
-        normal_row='''<div class="d-flex flex-row p-2"%(html_class_attr)s>
-                        <div class="col-1 "><h4>%(label)s</h4></div>
-                        <div class="col input-lg"> %(field)s%(help_text)s</div>
-                      </div>''',
-        error_row='%s',
-        row_ender='</div>',
-        help_text_html=' <span class="helptext">%s</span>',
-        errors_on_separate_row=True,
-    )
-    
+class PasswordForm(forms.Form):
+  password1 = forms.CharField(label='Enter password', widget=forms.PasswordInput)
+  password2 = forms.CharField(label='Confirm password', widget=forms.PasswordInput)
+
+  def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Password don't match")
+
+        return password2
+
+
+
+class CustomUserCreationForm(forms.Form):
+    username = forms.CharField(label='Enter Username', min_length=4, max_length=150)
+    email = forms.EmailField(label='Enter email')
+    password1 = forms.CharField(label='Enter password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Confirm password', widget=forms.PasswordInput)
+
+    def clean_username(self):
+        username = self.cleaned_data['username'].lower()
+        r = User.objects.filter(username=username)
+        if r.count():
+            raise  ValidationError("Username already exists")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].lower()
+        r = User.objects.filter(email=email)
+        if r.count():
+            raise  ValidationError("Email already exists")
+        return email
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+
+        if password1 and password2 and password1 != password2:
+            raise ValidationError("Password don't match")
+
+        return password2
+
+    def save(self, commit=True):
+        user = User.objects.create_user(
+            self.cleaned_data['username'],
+            self.cleaned_data['email'],
+            self.cleaned_data['password1']
+        )
+        return user

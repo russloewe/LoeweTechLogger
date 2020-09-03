@@ -1,0 +1,18 @@
+{% extends "logger/base.html" %}
+
+{% block content %}
+<div class="col-10 mx-auto">
+  <div class="card">
+    <div class="card-header">
+      <h2>Register</h2>
+    </div>
+    <div class="card-body">
+      <h3>Registration Closed</h3>
+      <p>Thank you for your interest. However this app is not open to the public.</p>
+    </div>
+    <div class="card-footer">
+      <a href="{% url 'logger:LoginView' %}" class="btn btn-primary">Login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

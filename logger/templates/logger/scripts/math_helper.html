@@ -1,3 +1,5 @@
+<script>
+
 function update_insulin() {
   var bg = document.getElementById('bloodsugar-helper').value;
   var carb = document.getElementById('carbs-helper').value;
@@ -15,8 +17,10 @@ function update_insulin() {
 
 
 function update_bg() {
+  const bg_start = {{patient.correction_start}};
+  const bg_step = {{patient.correction_step}};
   const bg = document.getElementById('id_bloodsugar').value;
-  var insulin = ((bg - 200 )/ 50)* 0.5 + 1 ; // insulin calc here
+  var insulin = ((bg - bg_start )/ bg_step) + 1 ; // insulin calc here
   if(insulin < 0.5){
     document.getElementById('bloodsugar-helper').value = 0;
   }else{
@@ -28,7 +32,7 @@ function update_bg() {
 
 function update_carbs() {
   const carbs = document.getElementById('id_carbs').value;
-  const insul = Number(carbs) / 15;
+  const insul = Number(carbs) / {{patient.carb_ratio}};
   if(insul < 0.5){
     document.getElementById('carbs-helper').value = 0;
   }else{
@@ -41,3 +45,5 @@ $(document).ready(function(){
   $(':input', '#add_form')
     .trigger('reset');}
 );
+
+</script>

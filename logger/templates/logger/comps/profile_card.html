@@ -1,0 +1,31 @@
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h2>My Profile</h2>
+    </div>
+    <div class="card-body">
+        <div class="col">
+            <div class="row">
+                username: {{request.user.username}} 
+            </div>
+            <div class="row">
+                first name: {{request.user.first_name}}
+            </div>
+            <div class="row">
+                last name: {{request.user.last_name}}
+            </div>
+            <div class="row">
+                email: {{request.user.email}}
+            </div>
+        </div>
+        
+    </div>
+    <div class="class-footer">
+        <a class="btn btn-primary m-3" href="{% url 'logger:ProfileUpdateView' %}">
+            Edit Profile
+        </a>
+        <a class="btn btn-primary m-3" href="{% url 'logger:ProfileUpdatePasswordView' %}">
+            Change Password
+        </a>
+    </div>
+</div>
