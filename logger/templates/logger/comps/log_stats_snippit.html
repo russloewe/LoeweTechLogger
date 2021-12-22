@@ -65,6 +65,29 @@
                 </div>
                 {% endif %}
                 
+                {% if log.bp_high %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #eec8f8">BpH</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.bp_high}}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if log.bp_low %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #da93ce">BpL</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.bp_low}}</span>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div><!-- /Quick Stats -->
     </li>

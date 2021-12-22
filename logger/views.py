@@ -18,6 +18,7 @@ from django.template import loader
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 import pytz
+from datetime import datetime
 from django.views import generic
 from django.utils import timezone
 from django.utils.timezone import localtime
@@ -27,8 +28,12 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from .models import Log, Patient
-from .forms import LogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm
+from .forms import LogForm, UpdateLogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm
 from .plots import  ordinal, Chart
+
+
+
+
 # Our own mix up
 class SiteView(LoginRequiredMixin, View):
   name = None
@@ -64,6 +69,7 @@ class SiteView(LoginRequiredMixin, View):
       context = {'error_message': message}
       template = loader.get_template('logger/views/errorView.html')
       return(HttpResponse(template.render(context, request)))
+
 
 # Views Start Here
 
@@ -112,14 +118,17 @@ class LogCreateView(SiteView):
         basal = None
         if form.cleaned_data['basalcheck']:
           basal = form.cleaned_data['basal']
-        log = Log.objects.create(date=timezone.now(),
-                                  user = request.user,
+        log = Log.objects.create(user = request.user,
                                   insulin = form.cleaned_data['insulin'],
                                   bloodsugar = form.cleaned_data['bloodsugar'],
                                   carbs = form.cleaned_data['carbs'],
                                   steps = form.cleaned_data['steps'],
+                                  bp_high = form.cleaned_data['bp_high'],
+                                  bp_low = form.cleaned_data['bp_low'],
                                   patient = patient,
-                                  basal = basal)
+                                  basal = basal,
+                                  date=timezone.now(),
+                                  )
         try:
           log.save()
           return redirect('logger:PatientView', pk)
@@ -135,46 +144,32 @@ class LogCreateView(SiteView):
 
 class LogUpdateView(SiteView):
     ''' Edit a log. 
-        - GET: renders the /logger/update.html form
-        - POST: Updates db then renders /logger/update.html with result
                 '''
     def get(self, request, pk):
         log = get_object_or_404(Log, pk=pk) # load log
-        form = LogForm(initial={'datetime': log.date,
-                                'bloodsugar': log.bloodsugar,
-                                'carbs': log.carbs,
-                                'insulin': log.insulin,
-                                'basal': log.basal,
-                                'steps': log.steps})
+        form = UpdateLogForm(instance=log)
+      
         context = {'form': form,
                    'log_id': log.id}
         # GET render edit page
-        return render(request, 'logger/views/logUpdateView.html', context)
+        return render(request, 'logger/views/LogUpdateView.html', context)
         
     def post(self, request, pk):
           log = get_object_or_404(Log, pk=pk) # load log
-          optional_keys = ['insulin', 'carbs', 'bloodsugar']
       
-          form = LogForm(request.POST)
+          form = UpdateLogForm(request.POST, instance=log)
           if form.is_valid():
-            log.date = form.cleaned_data['datetime']
-            log.insulin = form.cleaned_data['insulin']
-            log.bloodsugar = form.cleaned_data['bloodsugar']
-            log.carbs = form.cleaned_data['carbs']
-            log.basal = form.cleaned_data['basal']
-            log.steps = form.cleaned_data['steps']
-            
             try:
-                log.save()
+                form.save()
             # Update Failure
             except Exception as e:
-                context = {'error_message': 'Error saving log'}
+                context = {'error_message': str(e)}
                 return render(request, 'logger/views/errorView.html', context)
             else:
               return redirect('logger:LogView', log.id)
           else:
-            context = {'form': form}
-            return render(request, 'logger/views/logUpdateView.html', context)
+            context = {'form': form, 'log_id': log.id}
+            return render(request, 'logger/views/LogUpdateView.html', context)
 
 class LogDeleteView(SiteView):
     
@@ -236,7 +231,7 @@ class PatientView(SiteView):
           #carbData = patient.getCarb()
           # New log Form
           form = LogForm(initial={'patient': patient.id,
-                'datetime': timezone.now(),
+                'datetime': datetime.now(),
                 'basal': patient.basal_dose})
           context = { 'patient': patient,
                       'logs' : logs,
@@ -342,8 +337,8 @@ class PatientUpdateView(SiteView):
     def get(self, request, pk):
         ''' Render Form '''
         patient = get_object_or_404(Patient, pk=pk)
-        if request.user.id != patient.user.id:
-          context = {'error_message': 'You cannot edit that patient. Only the patient owner account may make changes.'}
+        if request.user.id != patient.user.id and request.user not in patient.connected.all():
+          context = {'error_message': 'You cannot edit that patient. Only the patient owner account or linked account may make changes.'}
           return render(request, 'logger/views/errorView.html', context)
         else:
           form = PatientForm(instance=patient)

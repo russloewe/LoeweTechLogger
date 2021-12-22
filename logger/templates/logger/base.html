@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-<!-- Global site tag (gtag.js) - Google Analytics -->
+<!-- Global site tag (gtag.js) - Google Analytics
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-44408252-3"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -12,7 +12,7 @@
   gtag('js', new Date());
   gtag('config', 'UA-44408252-3');
 </script>
-
+ -->
         <title>
             {% if title %}{{title}}{% else %}LoeweTech Logger{% endif %}
         </title>
@@ -21,19 +21,15 @@
         <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
         <link rel="manifest" href="/site.webmanifest">
 
-        <!-- JQUERY -->
-        <script src="https://loewetechsoftware.com/static/jquery.min.js"></script>
-      
         <!-- Chart.js -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js" integrity="sha512-vBmx0N/uQOXznm/Nbkp7h0P1RfLSj0HQrFSzV8m7rOGyj30fYAOKHYvCNez+yM8IrfnW0TCodDEjRqf6fodf/Q==" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js" integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg==" crossorigin="anonymous"></script>
-        <script src="https://loewetechsoftware.com/static/chartjs-plugin-annotation.min.js"></script>
+        <script src="/static/js/Chart.bundle.min.js" integrity="sha512-vBmx0N/uQOXznm/Nbkp7h0P1RfLSj0HQrFSzV8m7rOGyj30fYAOKHYvCNez+yM8IrfnW0TCodDEjRqf6fodf/Q==" crossorigin="anonymous"></script>
+        <script src="/static/js/moment.min.js" integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg==" crossorigin="anonymous"></script>
+        <script src="/static/chartjs-plugin-annotation.min.js" integrity="sha384-fIE8wIddxI8s1yO253uBKjQyxNZ5UuilW9rx7H4ePN7XS7Z9ukIeK+ECX5B8jDAj" crossorigin="anonymous"></script>
 
-        <!-- BOOTSTRAP CDN -->
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
         
-        </script>
+        <script src="/static/js/jquery.min.js" integrity="sha384-zYf0S7H//eS9brtunA8XNYySM1Q5RSBB00N+kB6awXJqJ0v5T1go9t6wwfJm7uTP" crossorigin="anonymous"></script>
+        <script src="/static/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+        
         <!-- BOOTSTRAP TAGS -->
         <meta name="msapplication-TileColor" content="#da532c">
         <meta name="theme-color" content="#ffffff">
@@ -41,12 +37,14 @@
         <meta name="author" content="Russell Loewe">
         
         <!-- OUR CSS -->
-        <link href="https://loewetechsoftware.com/static/style.css" rel="stylesheet">
-        
-        
+        <link href="/static/css/style.css" rel="stylesheet" integrity="sha256-b/40x61dcRnHAtVCG4ZKV35UUDilZkkpFBmyEx5tMrs=" crossorigin="anonymous">
+         <link href="/static/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+         <link href="/static/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
 
     </head>
     <body class="bg-dark">
+       
         
       <nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-between text-light">
         <div class="d-flex justify-content-between">

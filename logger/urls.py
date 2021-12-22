@@ -15,7 +15,7 @@
 
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from . import views
+from . import views, rest_views
 
 
 
@@ -23,6 +23,8 @@ app_name = 'logger'
 urlpatterns = [
     # INDEX
     path('', views.index, name='index'), # Landing page for all
+    #Rest
+    path('api/logs/' , rest_views.LogList.as_view()), 
     # LOGS
     path('log/<int:pk>/', views.LogView.as_view(), name='LogView'),
     path('log/create/<int:pk>/', views.LogCreateView.as_view(), name='LogCreateView'),

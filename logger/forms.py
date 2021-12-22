@@ -18,7 +18,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Patient
+from .models import Patient, Log
 import datetime
 
 this_year = datetime.date.today().year
@@ -47,7 +47,10 @@ class LogForm(forms.Form):
     basal_attrs = {'style': 'background: #aaaaaa',
                    'class': 'form-control',
                    'aria-controls': 'collapseBas'}
-
+    bp_high_attrs = {'style':'background:  #eec8f8',
+                   'class': 'form-control'}
+    bp_low_attrs = {'style':'background: #da93ce',
+                   'class': 'form-control'}
 
     patient = forms.IntegerField(label="patient", 
       widget=forms.HiddenInput())
@@ -73,6 +76,11 @@ class LogForm(forms.Form):
     basal = forms.IntegerField(label="dose", required=False,
       widget=forms.NumberInput(attrs=basal_attrs))
     
+    bp_high = forms.IntegerField(label="Bp High", required=False,
+      widget=forms.NumberInput(attrs=bp_high_attrs))
+    
+    bp_low = forms.IntegerField(label="Bp Low", required=False,
+      widget=forms.NumberInput(attrs=bp_low_attrs))
 
     def as_div(self):
       "Return this form rendered as HTML <div>s."
@@ -86,6 +94,16 @@ class LogForm(forms.Form):
           help_text_html=' <span class="helptext">%s</span>',
           errors_on_separate_row=True,
       )
+
+class UpdateLogForm(forms.ModelForm):
+  class Meta:
+    model = Log
+    fields = '__all__'
+    widgets = {
+  #    'patient': forms.HiddenInput,
+   #   'user': forms.HiddenInput
+    }
+
 
 class UserForm(forms.ModelForm):
   class Meta:

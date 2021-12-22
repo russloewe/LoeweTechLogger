@@ -93,7 +93,7 @@ class Patient(models.Model):
           arranged by date, newest first
       '''
       logs = self.log_set.order_by('-date')
-      return(logs)
+      return(logs[:12])
       
     def getLogsRev(self):
         logs = self.log_set.order_by('date')
@@ -137,15 +137,17 @@ class Patient(models.Model):
         return None
         
 class Log(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, default=2)
-    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, editable=False)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING,  editable=False)
     date = models.DateTimeField('timestamp')
-    insulin = models.FloatField(default=0, null=True)
-    carbs = models.FloatField(default=0, null=True)
-    bloodsugar = models.FloatField(default=0, null=True)
+    insulin = models.FloatField(blank=True, null=True)
+    carbs = models.FloatField(blank=True, null=True)
+    bloodsugar = models.FloatField(blank=True, null=True)
     basalcheck = models.BooleanField(default=False)
-    basal = models.FloatField(default=0, null=True)
-    steps = models.FloatField(default=0, null=True)
+    basal = models.FloatField(blank=True, null=True)
+    steps = models.FloatField(blank=True, null=True)
+    bp_high = models.IntegerField(blank=True, null=True)
+    bp_low = models.IntegerField(blank=True, null=True)
     
     def getJSDateTime(self):
         '''
@@ -221,3 +223,5 @@ class Log(models.Model):
             minute = '0' + str(minute)
         text = "{}, {} at {}:{} {}".format(month_day, year, hour, minute, ampm)
         return(text)
+
+
