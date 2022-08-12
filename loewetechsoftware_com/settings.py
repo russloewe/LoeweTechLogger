@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
 from corsheaders.defaults import default_headers
-
+env = environ.Env()
+environ.Env.read_env()
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -30,6 +32,8 @@ ALLOWED_HOSTS = ['*']
 
 
 # Application definition
+
+
 
 INSTALLED_APPS = [
     'corsheaders',
@@ -42,8 +46,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'djoser',
+     'django_crontab',
     'rest_framework',
     'rest_framework.authtoken',
+
+
+]
+
+CRONJOBS = [
+    ('*/1 * * * *', 'scripts.cron_tasks.every_minute'), # every 1 min
+    ('*/15 * * * *', 'scripts.cron_tasks.every_15_min'), # every 15 min
+    ('0 1 * * *', 'scripts.cron_tasks.every_night'), # every night, 1 am
+    ('0 1 * * 1', 'scripts.cron_tasks.every_monday_night'), # 1 am every monday
+    ('0 1 1,15 * *', 'scripts.cron_tasks.every_two_weeks'), # 1 am every 1st and 15th of the month
 
 ]
 
@@ -62,6 +77,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+      #debug
    # 'csp.middleware.CSPMiddleware',
 ]
 
@@ -103,12 +119,19 @@ WSGI_APPLICATION = 'loewetechsoftware_com.wsgi.application'
 # then
 # sudo chown -R www-data:www-data ~/db
 
-    
 DATABASES = {
 'default': {
          'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': '/home/russell/Dropbox/loewetechsoftware_com/db/logger.db',
+         'NAME': env('DBDIR')+'/logger.db',
      }
+   # 'default': {
+        # 'ENGINE': 'django.db.backends.postgresql',
+        # 'NAME': '',
+        # 'USER': '',
+        # 'PASSWORD': '',
+        # 'HOST': '127.0.0.1',
+        # 'PORT': 5432,
+    # }
 }
 
 
@@ -163,3 +186,11 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'HTTP_AUTHORIZATION',
     'Authorization',
 ]
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER  = env('EMAIL_HOST_USER')
+EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
