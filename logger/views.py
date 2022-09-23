@@ -44,6 +44,7 @@ from django.core.mail import EmailMessage
 
 # reading .env file
 env = environ.Env()
+environ.Path('../loewetechsoftware_com')
 environ.Env.read_env()
 twilio_account_sid = env('TWILIO_ACCOUNT_SID')
 twilio_auth_token = env('TWILIO_AUTH_TOKEN')
