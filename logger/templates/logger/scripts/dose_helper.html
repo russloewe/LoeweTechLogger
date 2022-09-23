@@ -1,0 +1,89 @@
+<script>
+function round(number){
+    // Rounds number to closest tenths
+    const rounded = Math.round(number * 10) / 10;
+    return(rounded)
+};
+    
+function update_insulin() {
+  var bg = document.getElementById('bloodsugar-helper').value;
+  var carb = document.getElementById('carbs-helper').value;
+  if(isNaN(bg)){
+      bg = 0;
+  };
+  if(isNaN(carb)){
+      carb = 0;
+  };
+  
+  var insulin = Number(bg) + Number(carb);
+  console.log('suggested dose: ', insulin);
+  document.getElementById('insulin-helper').value = round(insulin);
+}
+
+
+function update_bg() {
+  const bg_start = {{dose.correction_start}};
+  const bg_step = {{dose.correction_step}};
+  const bg = document.getElementById('id_bloodsugar').value;
+  var insulin = ((bg - bg_start )/ bg_step) + 1 ; // insulin calc here
+  if(insulin < 0.5){
+    document.getElementById('bloodsugar-helper').value = 0;
+  }else{
+  document.getElementById('bloodsugar-helper').value = round(insulin);
+  }
+  update_insulin();
+}
+
+
+function update_carbs() {
+  const carbs = document.getElementById('id_carbs').value;
+  const insul = Number(carbs) / {{dose.carb_ratio}};
+  if(insul < 0.5){
+    document.getElementById('carbs-helper').value = 0;
+  }else{
+  document.getElementById('carbs-helper').value = round(insul);
+  }
+  update_insulin();
+}
+
+function update_basal() {
+  document.getElementById('id_basal').value = {{dose.basal_dose}};
+
+}
+
+function add_basal_button(){
+    
+    var a = document.createElement('div');
+    var linkText = document.createTextNode("add basal");
+    a.appendChild(linkText);
+    a.title = "basal";
+    a.id = "basal_button";
+    a.onclick= update_basal;
+    a.style.marginBottom = '5px';
+    a.style.marginRight = '4px';
+    a.style.marginLeft = '4px';
+    a.style.paddingLeft = '12px';
+    a.style.border = '1px solid #cccccc';
+    a.style.maxWidth = '110px';
+    a.style.borderRadius = "25px"; 
+    a.style.color = 'rgb(73, 80, 87)';
+    a.style.backgroundColor = '#e6e6e6';
+    document.getElementById('id_basal').parentElement.append(a);
+    
+    //document.getElementById('id_basal').onchange = update_basal;
+    //document.getElementById('id_basal').onkeyup = update_basal;
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Math helper loaded!");
+  document.getElementById('id_carbs').onchange = update_carbs;
+    document.getElementById('id_carbs').onkeyup = update_carbs;
+    document.getElementById('id_bloodsugar').onchange = update_bg;
+    document.getElementById('id_bloodsugar').onkeyup = update_bg;
+     add_basal_button();
+    
+});
+
+
+</script>

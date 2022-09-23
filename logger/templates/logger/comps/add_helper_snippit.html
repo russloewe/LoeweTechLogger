@@ -1,50 +1,41 @@
-<!-- Helper Header -->
-<div class="d-flex flex-row border-top">
-    <h6>Insulin math helper:</h6>
-</div>
-<!-- Helper boxes --> 
-<div class="d-flex flex-row border-bottom">
-    <!-- BG Helper -->
-    <div class="small-input m-1">
-        <input class="form-control "
-            id="bloodsugar-helper"
-            type="text"
-            style="background: #ffaaaa;"
-            placeholder="BG"
-            disabled
-            readonly>
-    </div><!-- //BG Helper -->
-    
-    <!-- Plus sign -->
-    <div class="">
-        <span class="btn btn-sm border">+</span>
-    </div>
-    
-    <!-- Carbs Helper-->
-    <div class="small-input m-1">
-        <input class="form-control"
-            id="carbs-helper"
-            type="text"
-            style="background: #aaffaa;"
-            placeholder="C"
-            disabled
-            readonly>
-    </div><!-- //Carbs Helper-->
-    
-    <!-- Equals sign -->
-    <div class="">
-        <span class="btn btn-sm border">=</span>
-    </div>
-    
-    <!-- Insulin Helper -->
-    <div class="small-input m-1">
-        <input class="form-control"
-            id="insulin-helper"
-            type="text"
-            style="background: #aaaaff"
-            placeholder="IN"
-            disabled
-            readonly>
+<!-- Dose Helper-->
+<div class="dose-helper">
+<!-- Dose info -->
+    <h6 class="dose-helper">Insulin math helper {% if dose.label %} ({{dose.label}}) {% endif %}:</h6>
 
-    </div><!-- //Insulin Helper-->
+    <table class="dose-helper">
+        <tr>
+            <td class="dose-helper"><!-- BG Helper -->
+                    <input 
+                        class="bloodsugar dose-helper"
+                        id="bloodsugar-helper"
+                        type="text"
+                        placeholder="BG"
+                        disabled
+                        readonly>
+            </td>
+            <td class="dose-helper"><!-- Plus sign -->
+                  <span>+</span>
+            </td>
+            <td class="dose-helper"><!-- Carbs Helper-->
+                    <input class="carbs dose-helper"
+                        id="carbs-helper"
+                        type="text"
+                        placeholder="C"
+                        disabled
+                        readonly>
+            </td>
+            <td class="dose-helper"><!-- Equals sign -->
+                    <span class="">=</span>
+            </td>
+            <td class="dose-helper"><!-- Insulin Helper -->
+                        <input class="insulin dose-helper"
+                            id="insulin-helper"
+                            type="text"
+                            placeholder="IN"
+                            disabled
+                            readonly>
+            </td>
+        </tr>
+    </table>
 </div><!-- //Helper -->

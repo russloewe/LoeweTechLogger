@@ -1,0 +1,39 @@
+
+{{dose.patient}}
+<table>
+    <tr>
+        <th>Dose Window</th>
+        <th>start time</th>
+        <th>end time</th>
+        <th>carb ratio</th>
+        <th>correction start</th>
+        <th>correction step </th>
+        <th>days</th>
+        <th>active</th>
+    </tr>
+    <tr>
+        <td>{{dose.label}}</td>
+        <td>{{dose.start}}</td>
+        <td>{{dose.end}}</td>
+        <td>{{dose.carb_ratio}}</td>
+        <td>{{dose.correction_start}}</td>
+        <td>{{dose.correction_step}}</td>
+        
+        <td>           
+            {% if dose.days.all  %}
+                {% for day in dose.days.all %}
+                    {{day}}
+                {% endfor %}
+            {%else%}
+                {% if dose.fields  %}
+                    {{dose.days}} 
+                {% endif %}
+            {% endif %}
+        </td>
+        <td>{{dose.active}}</td>
+    </tr>
+    <tr>
+        
+    </tr>
+
+</table>

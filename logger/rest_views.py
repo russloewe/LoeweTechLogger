@@ -13,6 +13,54 @@ from rest_framework.response import Response
 from .models import Patient, Log
 from .serializers import PatientSerializer,  LogSerializer
 from django.contrib.auth.models import User
+from rest_framework import mixins
+from rest_framework import generics
+
+
+class PatientPermission(permissions.BasePermission):
+    edit_methods = ('PUT')
+    
+    def has_permission(self, request, view):
+        pk = self.request.query_params['patient']
+        patient = Patient.objects.filter(pk =  patient_id)[0]
+        owner_patients = Patient.objects.filter(user_id = request.user.id)
+        connected_patients = Patient.objects.filter(connected = request.user.id)
+        patients = owner_patients | connected_patients
+        if patient in patients:
+            return(True)
+        else:
+            return(False)
+
+class LogUpdateView(mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+    queryset = Log.objects.all()
+    serializer_class = LogSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+
+class FitbitRedirectEndpoint(APIView):
+    
+    def get(self, pk):
+        data = ''
+        for key in self.request.query_params:
+            data += '({}, {})'.format(key, self.request.query_params[key])
+        raise Exception(data)
+        return Response({'status':1})
+
+class ServerStatus(APIView):
+    
+    def get(self, pk):
+        return(Response({'status': 1}))
+
+
 
 class LogList(generics.ListCreateAPIView):
     authentication_classes = [TokenAuthentication]
@@ -22,13 +70,27 @@ class LogList(generics.ListCreateAPIView):
     def get_queryset(self):
         #patient = self.kwargs['patient']
         pk = self.request.query_params['patient']
-        queryset = Log.objects.filter(patient=pk).order_by('-date')[0:10]
+        queryset = Log.objects.filter(patient=pk).order_by('-date')[0:100]
         return(queryset)
 
     def perform_create(self, serializer):
-       # user = User.objects.get(pk=)
-        serializer.save(user=self.request.user, date=timezone.now() )
+        # user = User.objects.get(pk=)
+        patient_id = int(self.request.query_params['patient'])
+        patient = Patient.objects.filter(pk =  patient_id)[0]
+        serializer.save(user=self.request.user, patient= patient, date=timezone.now() )
+        return Response({ 'status': 1})
 
+class LogListNoSteps(generics.ListCreateAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = LogSerializer
+    
+    def get_queryset(self):
+        #patient = self.kwargs['patient']
+        pk = self.request.query_params['patient']
+        queryset = Log.objects.filter(patient=pk, steps=None).order_by('-date')[0:30]
+        return(queryset)
+        
 class CustomAuthToken(ObtainAuthToken):
 
     def post(self, request, *args, **kwargs):

@@ -1,4 +1,10 @@
+{% extends "logger/base.html" %}
 
+
+{% block content %}
+
+<div class="box-container">
+   
 <div class="card">
     <div class="card-header">
         <h2>{{patient.first_name}} {{patient.last_name}}</h2>
@@ -12,7 +18,10 @@
             class="btn btn-secondary m-3">
             Edit Patient
         </a>
-        
+        <a href="{% url 'logger:DoseWindowListCreateView' patient.id %}"
+           class="btn btn-secondary m-3">
+           Dose Windows
+        </a>
         <a href="{% url 'logger:PatientLinkView' patient.id %}"
            class="btn btn-secondary m-3">
             Link Account
@@ -27,3 +36,7 @@
         </a>
     </div>
 </div>
+
+</div>
+
+{% endblock %}

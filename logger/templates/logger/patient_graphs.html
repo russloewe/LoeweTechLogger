@@ -1,0 +1,41 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+
+<div class="box-container">
+   
+<div class="card">
+    <div class="card-header">
+        <h2>{{patient.first_name}} {{patient.last_name}}</h2>
+    </div>
+    
+    
+    <div class="card-body">
+      <img class="graph" src='data:image/png;base64,{{ patient.getGraphs }}'>
+    </div>
+    <table class="pure-table">
+    <tr>
+        <td> Average TDD:</td> <td> {{patient.getTDD.tdd}} units</td>
+    </tr>
+    <tr>
+        <td>Suggested Basal min</td> <td> {{patient.getTDD.low}} units</td>
+    </tr>
+    <tr>
+        <td> Suggested Basal max</td> <td> {{patient.getTDD.high}} units</td> 
+    </tr>
+</table>
+    
+    <div class="card-footer">
+
+        <a href="{% url 'logger:PatientDetailView' patient.id %}"
+           class="btn btn-secondary m-3">
+           Back
+        </a>
+
+    </div>
+</div>
+
+</div>
+
+{% endblock %}

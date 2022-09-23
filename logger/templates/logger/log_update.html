@@ -1,0 +1,22 @@
+{% extends "logger/base.html" %}
+
+{% block content %}
+
+<!-- Form for changing Log values -->
+
+<div class="box-container">
+    <div class="box">
+      <h3>Update Log</h3>
+      <form method="post" action="{% url 'logger:LogUpdateView' log.id %}" >
+          {% include 'logger/comps/form_snippit.html' %}
+          <div class="row">
+              <input class="button-warning pure-button" type="submit" value="Update">
+              <a class="button-grey pure-button" href="{% url 'logger:LogDetailView' log.id %}">Back</a>
+          </div>
+      </form>
+      </div>
+</div>
+
+
+
+{% endblock %}

@@ -1,43 +1,38 @@
-<!-- 
-{% include 'logger/header/license.html' %}
--->
-<!DOCTYPE html>
 <html>
     <head>
-        <title>
-            {% if title %}{{title}}{% else %}LoeweTech Logger{% endif %}
-        </title>
-        <!-- Favicon -->
+         <!-- Favicon -->
         <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB8lBMVEUAAAAwGgrcejK5ZyoxGwv/jjrBaywzHAs0HAv//3X//6I5Hw1wPhn//7SpXib/q0bYeDE0HQz/1VeCSB3/mT5YMBP6izkEAgHAayv//8zNci5MKhGWVCKQUCCNTiCHSx+rXyfBayy+aivAaivAayuiWiWzYyjWdzDrgjXngDTPcy+sYCfPcy/ifjOKTR8/Iw7cejLWdzCNTiChWiSvYSinXSafWCSqXyetYCegWSSSUSGoXSbmgDTvhTbHby3Ocy/ifjPTdTDcejLmgDTZeTHWdzDkfjTJby3DbCzuhDbogTWxYih8RRzefDLbejKjWyXifjPQdC+zYyjkfzTQdC/TdTDffDJXMBS6aCrWdzCuYSezYyjqgjXsgzW+aisAAADUdjDGbi12QhvffDPTdTCtYCe0ZCnVdzDIby3xhjbkfzSdVyO8aCqwYih1QRq2ZSnqgjXvhTbEbSyjWiW+aiveezLjfjPRdC/ZeTEAAAAGBQOrXyfRdC/kfzTUdjDRdC/bejLmgDTPcy/ffDPMcS6TUiGrXyehWSSvYSexYiipXiaXVCK1ZSnsgzXrgjW4ZirQcy/ifjOGSx6WVCLGbi3efDLsgzXhfTPEbSyRUSGNTiC6ZyrBayy9aSvAayy5ZyqJTB/yhjfyhzfzhzfxhjb////cdzfTAAAAoXRSTlMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABkzMDAzE0u+7+enM3vKFQWvlAkUFhQUFRUUDh/e/ll81bTF1L+51YJN+ucoC8WmMs9+N919hr0HMsBTZez1PwGnWgu+hS50t8H91BdkKwQ86f1gFES85siiAgE8r9GwqMXWttxoCRUTFRYUEEr07jN5zBMUidLw2YgRCC4xLzEsBUqxtO4AAAABYktHRKUuuUovAAAAB3RJTUUH4wwfBQUpqIDHhgAAANVJREFUGNNjYEAHjEwKikrKKqrMMAEWVjV1DU0tbTaYADsHp85CXT0ubrgeHn2DRYa8RsYmpmbmFpZWDAx81ja2dvz2Do5Ozi6ubu4MDAIenl7ePr5+/gGLAoOCQxgEhUIXhoVHREZFx8TGxSckMggnJS9MEUlNS8/IzMqOz8llyMsvKCwqLiktK19cUSlaxcBQXVNbW1ff0NjUvKRFTBxoa2tbe3tHZ1d3T29fvwTcLeIMkhMWTpwkJQ0TkJk8Zeq06TNmysIE5GbNnjN33vwF8gyYAACCjjjavybuMgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0zMVQwNTowNTo0MSswMTowMFm08NEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMzFUMDU6MDU6NDErMDE6MDAo6UhtAAAAV3pUWHRSYXcgcHJvZmlsZSB0eXBlIGlwdGMAAHic4/IMCHFWKCjKT8vMSeVSAAMjCy5jCxMjE0uTFAMTIESANMNkAyOzVCDL2NTIxMzEHMQHy4BIoEouAOoXEXTyQjWVAAAAAElFTkSuQmCC" rel="icon" type="image/x-icon" />
-
-        <link rel="manifest" href="/site.webmanifest">
-        
-        <!-- Disable double tap zoom iphone -->
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=0"/>
-        
-        <style type="text/css" media="screen">
-        {% include 'logger/style.css' %}
-        </style>
-
+    
+        <script>
+            function getURLFragment(key){
+                var hash = window.location.hash.substr(1);
+                var result = hash.split('&').reduce(function (result, item) {
+                    var parts = item.split('=');
+                    result[parts[0]] = parts[1];
+                    return result;
+                }, {});
+                return result[key];
+            }
+            
+            document.addEventListener("DOMContentLoaded", () => {
+                var token = getURLFragment('token');
+                console.log(token);
+                document.getElementById('id_token').value = token;
+                document.expressAccessForm.submit();
+            });
+         
+            
+        </script>
     </head>
-    <body >
-        <div class="container">
-            <div class="row"><!-- Navbar -->
-            {% include 'logger/comps/navbar_snippit.html' %}
-            </div>
-            <div class="row" > <!-- Main Site Content -->
-              <!-- Error message here -->
-                {% if error_message %}
-                    {% include 'logger/scripts/error_snippit.html' %}
-                {% endif %}
-            <!-- End Error -->
-            <!-- View block here -->
-                {% block content %}{% endblock %}
-            <!-- End of View content -->
-            </div>
-            <div class="row"><!-- Site footer -->
-                <p class="">Copyright Russell Loewe 2019</p>
-            </div>
-        </div>
+    <body>
+        <div class="box">
+            <h3>Express Login</h3>
+
+            <form method="post" action="{% url 'logger:ExpressAccessView' %}" name="expressAccessForm">
+                {% include 'logger/comps/form_snippit.html' %}
+                <input type="submit" form="expressAccessForm" value="Submit" >
+            </form>
+        
+        </div> 
     </body>
 </html>

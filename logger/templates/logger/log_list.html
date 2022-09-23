@@ -1,0 +1,29 @@
+{% extends "logger/base.html" %}
+
+
+
+{% block content %}
+
+
+<div class="">
+    <h1 class="text-center text-light">
+        {{patient.first_name}} {{patient.last_name}}
+    </h1>
+    
+    {% include 'logger/comps/add.html' with dose=patient.getDose %}
+
+    <div class="col">
+        <h4 id="lastInsulin"> Last  Dose: {{patient.lastDoseRelTime}}</h4>
+        <ul class="list">
+            <li class="list-item">
+                <h3 class="text-center">Recent Logs</h3>
+            </li>
+            {% for log in log_list %}
+                {% include 'logger/comps/log_stats_snippit.html' with log=log %}
+            {% endfor %}
+
+        </ul>
+        
+    </div>
+</div>
+{% endblock %}

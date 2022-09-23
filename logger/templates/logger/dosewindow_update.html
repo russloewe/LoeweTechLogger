@@ -1,0 +1,21 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+{% include 'logger/scripts/time_format.html' %}
+
+<div class="box-container">
+    <div class="box">
+        <h1>Update Dose Window</h1>
+        <form method="post">{% csrf_token %}
+                {% if form.errors %}
+                        {% include 'logger/comps/form_error_card.html' %}
+                        <h3>Errors</h3>
+                    {% endif %}
+                 {% include 'logger/comps/dosewindow_table.html' with dose=form %}
+        <input class="button-warning pure-button" type="submit" value="Update">
+        <a class="button-grey pure-button" href="{% url 'logger:DoseWindowListCreateView' patient.id %}">Back</a>
+    </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+<div>
+    <div>
+        <h2>Two Factor Authentication</h2>
+        <p>Enter the code</p>
+        <h3>{{otp_code}}</h3>
+        <p>to finish logging in.</p>
+
+    </div>
+    
+    <div>
+        <p>or click this link to login directly:</p>
+        <a href="{{ request.scheme }}://{{ request.get_host }}{% url 'logger:OtpView' otp_endpoint %}?otp_code={{otp_code}}">
+            {{ request.scheme }}://{{ request.get_host }}{% url 'logger:OtpView' otp_endpoint %}?otp_code={{otp_code}}</a>
+    </div>
+</div>

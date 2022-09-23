@@ -15,12 +15,10 @@
             {% for patient in patients %}
                 {% include 'logger/comps/patient_snippit.html' with patient=patient %}
             {% endfor %}
+            
         </div>
         <div class="card-footer">
-            <a href="{% url 'logger:PatientCreateView' %}"
-               class="btn btn-primary">
-                New Patient
-            </a>
+           
         </div>
     </div>
 

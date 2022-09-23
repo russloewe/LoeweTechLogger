@@ -1,0 +1,23 @@
+{% extends "logger/base.html" %}
+
+{% block content %}
+{% include 'logger/scripts/date_format.html' %}
+<div class="box-container">
+<div class="box">
+
+        <h3>Update Patient</h3>
+
+    
+    <div class="">
+
+        <form method="post" action="{% url 'logger:PatientUpdateView' patient.id %}">
+            {% include 'logger/comps/form_snippit.html' %}
+            <div >
+                <input class="button-warning pure-button" type="submit" value="Update">
+                <a class="button-grey pure-button" href="{% url 'logger:LogListCreateView' patient.id %}">Back</a>
+            </div>
+        </form>
+        
+    </div> 
+</div>
+{% endblock %}

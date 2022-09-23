@@ -1,21 +1,12 @@
-<div class="row">
-    <div class="col-6">
+<div class="box-container">
+    <div class="box">
+        
         <ul class="list-group">
             <li class="list-group-item">
                 Birthday: {{patient.dob}}
             </li>
             <li class="list-group-item">
                 Basal insulin dose: {{patient.basal_dose}}
-            </li>
-            <li class="list-group-item">
-                Carb Ratio: {{patient.carb_ratio}} units/gram
-            </li>
-
-            <li class="list-group-item">
-                Correction Start: {{patient.correction_start}}
-            </li>
-            <li class="list-group-item">
-                Correction Step: {{ patient.correction_step }}
             </li>
             <li class="list-group-item">
                 User Account: {{ patient.user.username}}
@@ -27,8 +18,23 @@
                         <li>{{user.username}}</li>
                     {% endfor %}
                 </ul>
-                
+            </li>
+            <li class="list-group-item">
+                <table class="pure-table">
+                    <tr>
+                        <td> Average TDD:</td> <td> {{patient.getTDD.tdd}} units</td>
+                    </tr>
+                    <tr>
+                        <td>Suggested Basal min</td> <td> {{patient.getTDD.low}} units</td>
+                    </tr>
+                    <tr>
+                        <td> Suggested Basal max</td> <td> {{patient.getTDD.high}} units</td> 
+                    </tr>
+                </table>
+            
             </li>
         </ul>
+        
+        
     </div>
 </div>

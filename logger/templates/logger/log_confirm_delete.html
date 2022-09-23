@@ -1,0 +1,24 @@
+{% extends "logger/base.html" %}
+
+{% block content %}
+<div class="card">   
+    
+    <div class="card-header border">
+        <h3>Delete Log?</h3>
+    </div>
+    
+    <div class="card-body col-6 d-flex flex-column">
+        {% include 'logger/comps/error_snippit.html' %}
+        {% if log %}
+        {% include 'logger/comps/log_stats_snippit.html' %}
+        <form method="post" action="{% url 'logger:LogDeleteView' log.id %}" >
+            {% csrf_token %}
+            <div class="form-row">
+                <input class="btn btn-danger m-3" type="submit" value="Delete">
+                <a class='btn btn-secondary m-3' href="{% url 'logger:LogDetailView' log.id %}">Back</a>
+            </div>
+        </form>
+        {% endif %}
+    </div>   
+</div>
+{% endblock %}

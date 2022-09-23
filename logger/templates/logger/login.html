@@ -1,0 +1,25 @@
+<!-- templates/registration/login.html -->
+{% extends "logger/base.html" %}
+
+{% block userbox %}
+{% endblock %}
+
+{% block content %}
+
+<div class="pure-g">
+<div class="box-container pure-u-1-3">
+    <div class="box">
+        <!-- Sign in -->
+        <h4 class="">Sign in</h4>
+         <form method="post" >
+            {% include 'logger/comps/form_snippit.html' %}
+            <!-- submit -->
+            <div class="">
+                 <input  type="submit"   value="login">
+            </div>                                                           
+        </form>
+        </div>
+</div>
+</div> <!-- card.// -->
+
+{% endblock %}

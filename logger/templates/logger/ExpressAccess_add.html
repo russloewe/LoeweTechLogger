@@ -1,42 +1,52 @@
-<!-- 
-{% include 'logger/header/license.html' %}
--->
-<!DOCTYPE html>
 <html>
     <head>
-        <title>
-            {% if title %}{{title}}{% else %}LoeweTech Logger{% endif %}
-        </title>
-        <!-- Favicon -->
+         <!-- Favicon -->
         <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB8lBMVEUAAAAwGgrcejK5ZyoxGwv/jjrBaywzHAs0HAv//3X//6I5Hw1wPhn//7SpXib/q0bYeDE0HQz/1VeCSB3/mT5YMBP6izkEAgHAayv//8zNci5MKhGWVCKQUCCNTiCHSx+rXyfBayy+aivAaivAayuiWiWzYyjWdzDrgjXngDTPcy+sYCfPcy/ifjOKTR8/Iw7cejLWdzCNTiChWiSvYSinXSafWCSqXyetYCegWSSSUSGoXSbmgDTvhTbHby3Ocy/ifjPTdTDcejLmgDTZeTHWdzDkfjTJby3DbCzuhDbogTWxYih8RRzefDLbejKjWyXifjPQdC+zYyjkfzTQdC/TdTDffDJXMBS6aCrWdzCuYSezYyjqgjXsgzW+aisAAADUdjDGbi12QhvffDPTdTCtYCe0ZCnVdzDIby3xhjbkfzSdVyO8aCqwYih1QRq2ZSnqgjXvhTbEbSyjWiW+aiveezLjfjPRdC/ZeTEAAAAGBQOrXyfRdC/kfzTUdjDRdC/bejLmgDTPcy/ffDPMcS6TUiGrXyehWSSvYSexYiipXiaXVCK1ZSnsgzXrgjW4ZirQcy/ifjOGSx6WVCLGbi3efDLsgzXhfTPEbSyRUSGNTiC6ZyrBayy9aSvAayy5ZyqJTB/yhjfyhzfzhzfxhjb////cdzfTAAAAoXRSTlMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABkzMDAzE0u+7+enM3vKFQWvlAkUFhQUFRUUDh/e/ll81bTF1L+51YJN+ucoC8WmMs9+N919hr0HMsBTZez1PwGnWgu+hS50t8H91BdkKwQ86f1gFES85siiAgE8r9GwqMXWttxoCRUTFRYUEEr07jN5zBMUidLw2YgRCC4xLzEsBUqxtO4AAAABYktHRKUuuUovAAAAB3RJTUUH4wwfBQUpqIDHhgAAANVJREFUGNNjYEAHjEwKikrKKqrMMAEWVjV1DU0tbTaYADsHp85CXT0ubrgeHn2DRYa8RsYmpmbmFpZWDAx81ja2dvz2Do5Ozi6ubu4MDAIenl7ePr5+/gGLAoOCQxgEhUIXhoVHREZFx8TGxSckMggnJS9MEUlNS8/IzMqOz8llyMsvKCwqLiktK19cUSlaxcBQXVNbW1ff0NjUvKRFTBxoa2tbe3tHZ1d3T29fvwTcLeIMkhMWTpwkJQ0TkJk8Zeq06TNmysIE5GbNnjN33vwF8gyYAACCjjjavybuMgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0zMVQwNTowNTo0MSswMTowMFm08NEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMzFUMDU6MDU6NDErMDE6MDAo6UhtAAAAV3pUWHRSYXcgcHJvZmlsZSB0eXBlIGlwdGMAAHic4/IMCHFWKCjKT8vMSeVSAAMjCy5jCxMjE0uTFAMTIESANMNkAyOzVCDL2NTIxMzEHMQHy4BIoEouAOoXEXTyQjWVAAAAAElFTkSuQmCC" rel="icon" type="image/x-icon" />
-
-        <link rel="manifest" href="/site.webmanifest">
+        
+        <!-- Inject CSS Styles here -->
+        <style type="text/css" media="screen">
+            {% include 'logger/style.css' %}
+        </style>
+        
+        <!-- OUR MATH HEALPER-->
+        {% include 'logger/scripts/dose_helper.html' with dose=patient.getDose %}
+        {% include 'logger/scripts/datetime_format.html' %}
         
         <!-- Disable double tap zoom iphone -->
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=0"/>
         
-        <style type="text/css" media="screen">
-        {% include 'logger/style.css' %}
-        </style>
-
     </head>
-    <body >
+    <body>
+        <h3>Patient, {{patient.first_name}} {{patient.last_name}}</h3>
+        <h4 id="lastInsulin"> Last Dose: {{patient.lastDoseRelTime}}</h4>
         <div class="container">
-            <div class="row"><!-- Navbar -->
-            {% include 'logger/comps/navbar_snippit.html' %}
+            <div class="row"><!-- First row is the adder snippit -->
+                <form method="post" 
+                      action="{% url 'logger:ExpressAccessAddConfirmView' %}" 
+                      id="expressAccessAddForm" 
+                      name="expressAccessAddForm">
+                    <label for="time">Use Current Time: </label>
+                    <input type="checkbox" id="time-active" name="time" value="active" checked>
+                    <br>
+                    {% include 'logger/comps/form_snippit.html' %}
+                </form>
+            </div> 
+            <div class="row"><!-- Second row is dose helper snippit -->
+                {% include 'logger/comps/add_helper_snippit.html' %}
             </div>
-            <div class="row" > <!-- Main Site Content -->
-              <!-- Error message here -->
-                {% if error_message %}
-                    {% include 'logger/scripts/error_snippit.html' %}
-                {% endif %}
-            <!-- End Error -->
-            <!-- View block here -->
-                {% block content %}{% endblock %}
-            <!-- End of View content -->
+            <div class="row"><!-- Third row is submit button -->
+                <input type="submit"  value="Submit" class="button-secondary"
+                onclick="!this.form && document.getElementById('expressAccessAddForm').submit()">
             </div>
-            <div class="row"><!-- Site footer -->
-                <p class="">Copyright Russell Loewe 2019</p>
+            <div class="row"><!-- Last row is recent logs list snippit -->
+                <ul class="">
+                    <li class="">
+                        <h3 class="">Recent Logs</h3>
+                    </li>
+                    {% for log in log_list %}
+                        {% include 'logger/comps/log_stats_snippit.html' with log=log %}
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </body>

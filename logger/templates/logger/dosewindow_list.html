@@ -1,0 +1,49 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+{% include 'logger/scripts/time_format.html' %}
+
+<div class=" mx-auto">
+    <div class="card p-2">
+        <div class="card-header border">
+            <h3>New Dose</h3>
+            {% if error %}
+                <h3>Errors</h3>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'logger:DoseWindowListCreateView' patient.id %}">
+                {% csrf_token %}
+                    {% if form.errors %}
+                        {% include 'logger/comps/form_error_card.html' %}
+                        <h3>Errors</h3>
+                    {% endif %}
+                 {% include 'logger/comps/dosewindow_table.html' with dose=form %}
+                <div class="row">
+                    <input class="btn btn-primary m-3" type="submit" value="Create">
+                    <a class='btn btn-secondary m-3' href="{% url 'logger:PatientDetailView' patient.id %}">Back</a>
+                </div>
+            </form>
+    </div>
+        
+    <div class="card p-2 mt-2">
+        <h1>Dose Window List</h1>
+        {% if dosewindow_list %}
+        <ul class="list-group">
+        {% for dosewindow in dosewindow_list %}
+          <li class="list-group-item">
+                        {% include 'logger/comps/dosewindow_table.html' with dose=dosewindow %}
+                         <a class="button-error pure-button" href="{% url 'logger:DoseWindowDeleteView' dosewindow.id %}">Delete</a>
+                        <a class="button-secondary pure-button" href="{% url 'logger:DoseWindowUpdateView' dosewindow.id %}">Update</a>
+          </li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        <p>There are no dose windows on file.</p>
+        {% endif %}
+    </div>
+        
+
+</div>
+{% endblock %}

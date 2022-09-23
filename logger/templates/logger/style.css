@@ -1,0 +1,221 @@
+@keyframes around {
+  0%  { left: 0; top: 0;}
+  25% { left: 240px; top: 0;}
+  50% { left: 240px; top: 140px;}
+  75% { left: 0; top: 140px;}
+  100%{ left: 0; top: 0;}
+}
+#loginButton{ animation: around 4s linear infinite;}
+
+h4 {
+    text-align: left;
+}
+
+#datetime-field {
+  font-size: 2px
+}
+/*
+ * Global Layout Styling
+ */
+ 
+div.container{
+    width: 100%;
+    height: 100%;
+}
+
+div.column{
+    margin: 10px 0;
+}
+
+div.row {
+    margin: 0 0;
+}
+/* end Global Layout */
+
+
+/* Global Table Styling */
+
+td:first-child {
+  padding-left: 15px;
+}
+
+td:last-child {
+  padding-right: 25px;
+}
+
+/* end Table */
+
+
+
+
+/* Form Snippet Styling
+ * */
+table.form-snippet {
+}
+
+td.form-snippet {
+    margin: 0 0;
+    padding: 0 0;
+}
+/* end Form Snippet */
+
+
+
+
+
+
+
+
+/* Layout for three divs side by side */
+
+.row-container{
+    width: 100%;
+    font-size: 12px;
+}
+.third{
+    float:left; 
+    width: 33%;
+}
+
+/* Narrow */
+
+.narrow {
+    width: max(350px);
+}
+
+span {
+    margin: 0 25%;
+}
+
+@media only screen and (max-width: 480px) {
+    /* horizontal scrollbar for tables if mobile screen */
+    
+    td:first-child {
+      padding-left: 0px;
+    }
+    
+    
+    input[type=text], input[type=number] {
+        width: 150px;
+        /* make sure this comes before dose-helper styling or this
+         * will resize that too */
+    }
+    
+  
+}
+
+/*
+color input background inputs
+*/
+
+.bloodsugar{
+   background: #ffaaaa;
+}
+.date{
+    background: #e6e6e6
+}
+.carbs{
+    background: #aaffaa
+}
+.insulin{
+    background: #aaaaff
+}
+.steps{
+    background:  #00dae6
+}
+.notes{
+    background: #ffff99
+}
+.basal{
+    background: #aaaaaa
+}
+
+/* end colors */
+
+
+.stat-button{
+height: 38px;
+margin-top: 4px;
+}
+
+.box-container{
+width: 100%;
+margin: 0 5%;
+padding: 1em;
+justify-content: center;
+}
+
+.box{
+border: solid black;
+}
+
+
+/* Button Styling */
+
+.button-success,
+.button-error,
+.button-grey,
+.button-warning,
+.button-secondary {
+    color: white;
+    border-radius: 4px;
+    padding: 10px 8px;
+    margin-top: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 20px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.button-success {
+    background: rgb(28, 184, 65);
+    /* this is a green */
+}
+
+.button-error {
+    background: rgb(202, 60, 60);
+    /* this is a maroon */
+}
+
+.button-warning {
+    background: rgb(223, 117, 20);
+    /* this is an orange */
+}
+
+.button-grey{
+    background: #aaaaaa
+}
+
+.button-secondary {
+    background: rgb(66, 184, 221);
+    /* this is a light blue */
+}
+
+/* end Button */
+
+/* Dose Helper Styling */
+
+/* table is used to make row of items */
+table.dose-helper{
+    border: none;
+}
+
+tr.dose-helper{
+    width: max(300px);
+}
+
+div.dose-helper {
+    width: max(300px);
+}
+
+h6.dose-helper {
+    margin: 5px 0;
+}
+
+input.dose-helper{
+    width: 40px;
+    margin: 0;
+    font-size: 12pt;
+}
+
+/* end Dose Helper */

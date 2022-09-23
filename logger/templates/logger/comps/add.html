@@ -1,21 +1,19 @@
 <!-- OUR MATH HEALPER-->
-{% include 'logger/scripts/math_helper.html' %}
-{% include 'logger/comps/add_confirm_modal.html' %}
+{% include 'logger/scripts/dose_helper.html' %}
+{% include 'logger/scripts/datetime_format.html' %}
 
+<div class="container"> 
+  <h3> New Log</h3>
 
-
-<div class="d-flex flex-column container  bg-light mb-3"> 
-  <h3 class="text-center"> New Log</h3>
-
-    {% if form.errors %}
-        {% include 'logger/comps/form_error_card.html' %}
-    {% endif %}
-
-    {% include 'logger/comps/add_form.html' %}
-    {% include 'logger/comps/add_helper_snippit.html' %}
-
-<!-- Error card goes here -->
-
+    <form action="{% url 'logger:LogListCreateView' patient.id %}" 
+      method="post"
+      id="addForm">
+        <input type="checkbox" id="time-active" name="time" value="active" checked>
+        <label for="time">Use Current Time</label><br>
+        {% include 'logger/comps/form_snippit.html' %}
+        {% include 'logger/comps/add_helper_snippit.html' %}
+        <input class="button-secondary" type="submit"  value="Submit" >
+    </form>
 
 </div><!-- //container -->
 

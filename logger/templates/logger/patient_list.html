@@ -1,0 +1,21 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+{% if error_message %}
+{% include 'logger/comps/error.html'%}
+
+{% else %}
+
+<div class="box-container">
+     <div class="box bg-white ">
+    <h1 >My Patients</h1>
+    {% for patient in patient_list %}
+      {% include 'logger/comps/patient_snippit.html' with patient=patient %}
+    {% endfor %}
+    </div>
+</div>
+
+
+{% endif %}
+{% endblock %}

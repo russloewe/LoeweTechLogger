@@ -15,7 +15,7 @@
             {% csrf_token %}
             <div class="form-row">
                 <input class="btn btn-danger m-3" type="submit" value="Delete">
-                <a class='btn btn-secondary m-3' href="{% url 'logger:LogView' log.id %}">Back</a>
+                <a class='btn btn-secondary m-3' href="{% url 'logger:LogDetailView' log.id %}">Back</a>
             </div>
         </form>
         {% endif %}

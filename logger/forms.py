@@ -17,70 +17,67 @@ from django import forms
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.auth import  login, logout, authenticate
 from django.core.exceptions import ValidationError
-from .models import Patient, Log
+from .models import Patient, Log, DoseWindow, Days, ExpressAccessToken
 import datetime
 
 this_year = datetime.date.today().year
 BIRTH_YEAR_CHOICES = [ str(year) for year in range(this_year, this_year-99, -1)]
+# DAYS_OF_WEEK = (
+    # (0, 'Monday'),
+    # (1, 'Tuesday'),
+    # (2, 'Wednesday'),
+    # (3, 'Thursday'),
+    # (4, 'Friday'),
+    # (5, 'Saturday'),
+    # (6, 'Sunday'),
+# )
 
-class LogForm(forms.Form):
-    datetime_attrs = {}
-    bg_attrs = {'style':'background: #ffaaaa',
-                'class': 'form-control',
-                'onchange':'update_bg()',
-                'onkeyup': 'update_bg()'}
-    carbs_attrs = {'style':'background: #aaffaa',
-                  'class': 'form-control',
-                  'onchange': 'update_carbs()',
-                  'onkeyup': 'update_carbs()'}
-    insulin_attrs = {'style':'background: #aaaaff',
-                    'class': 'form-control'}
-    basalcheck_attrs = {'style':'background: #aaaaaa',
-                    'class': 'custom-control-input',
+
+class LogForm(forms.ModelForm):
+    class Meta:
+        model = Log
+        fields = ["date", "bloodsugar", "carbs", "insulin", "basal",  "patient", "user", "notes"]
+        widgets = {
+            'patient': forms.HiddenInput,
+            'user': forms.HiddenInput
+            }
+
+    
+    basalcheck_attrs = {'class': 'custom-control-input',
                     'data-toggle': 'collapse',
                     'data-target': '#bas',
                     'aria-controls':'collapseBas',
                     'aria-expanded': 'false'}
-    steps_attrs = {'style':'background: #ffffaa',
-                   'class': 'form-control'}
-    basal_attrs = {'style': 'background: #aaaaaa',
-                   'class': 'form-control',
+    basal_attrs = {'class': 'form-control',
                    'aria-controls': 'collapseBas'}
-    bp_high_attrs = {'style':'background:  #eec8f8',
-                   'class': 'form-control'}
-    bp_low_attrs = {'style':'background: #da93ce',
-                   'class': 'form-control'}
+    form_control_class = {'class': 'form-control'}
+    
+    # patient = forms.IntegerField(label="patient", 
+      # widget=forms.HiddenInput())
 
-    patient = forms.IntegerField(label="patient", 
-      widget=forms.HiddenInput())
-
-    datetime = forms.DateTimeField(label="Log Datetime", required=False,
-      widget=forms.DateTimeInput(attrs=datetime_attrs))
+    date = forms.DateTimeField(label="Datetime", required=True,
+      widget=forms.DateTimeInput(attrs={'placeholder':'Datetime (yyyy/mm/dd hh:mm', 'class': 'date'}))
     
     bloodsugar = forms.IntegerField(label="Bloodsugar", required=False,
-      widget=forms.NumberInput(attrs=bg_attrs))
+      widget=forms.NumberInput(attrs={'placeholder': "Bloodsugar (mg/dL)", 'class': 'bloodsugar'}))
     
     carbs = forms.IntegerField(label="Carbs", required=False,
-      widget=forms.NumberInput(attrs=carbs_attrs))
+      widget=forms.NumberInput(attrs={'placeholder' : 'Carbs (g)', 'class': 'carbs'}))
+      
+    notes = forms.CharField(label="notes", required=False, 
+        widget=forms.TextInput(attrs={'placeholder': 'Notes', 'class': 'notes'}))
     
     insulin = forms.FloatField(label="Insulin", required=False,
-      widget=forms.NumberInput(attrs=insulin_attrs))
+      widget=forms.NumberInput(attrs={'placeholder': 'Insulin (units)', 'class': 'insulin'}))
     
-    basalcheck = forms.BooleanField(label="Basal", required=False,
-      widget=forms.CheckboxInput(attrs=basalcheck_attrs))
-    
-    steps = forms.IntegerField(label="Steps", required=False,
-      widget=forms.NumberInput(attrs=steps_attrs))
+    # steps = forms.IntegerField(label="Steps", required=False,
+      # widget=forms.NumberInput(attrs={'placeholder': 'Steps', 'class': 'steps'}))
       
-    basal = forms.IntegerField(label="dose", required=False,
-      widget=forms.NumberInput(attrs=basal_attrs))
+    basal = forms.IntegerField(label="Basal", required=False,
+      widget=forms.NumberInput(attrs={'placeholder': 'Basal', 'class': 'basal'}))
     
-    bp_high = forms.IntegerField(label="Bp High", required=False,
-      widget=forms.NumberInput(attrs=bp_high_attrs))
-    
-    bp_low = forms.IntegerField(label="Bp Low", required=False,
-      widget=forms.NumberInput(attrs=bp_low_attrs))
 
     def as_div(self):
       "Return this form rendered as HTML <div>s."
@@ -104,6 +101,13 @@ class UpdateLogForm(forms.ModelForm):
    #   'user': forms.HiddenInput
     }
 
+class DoseWindowForm(forms.ModelForm):
+    class Meta:
+        model = DoseWindow
+        fields = ['patient', 'label', 'days', 'start', 'end', 'carb_ratio', 'correction_start', 'correction_step', 'active']
+        widgets = {
+            'patient': forms.HiddenInput,
+            'days' : forms.CheckboxSelectMultiple }
 
 class UserForm(forms.ModelForm):
   class Meta:
@@ -113,9 +117,39 @@ class UserForm(forms.ModelForm):
 class PatientForm(forms.ModelForm):
   class Meta:
     model = Patient
-    fields = ['dob', 'first_name', 'last_name', 'carb_ratio', 'correction_start', 'correction_step', 'basal_dose']
+    fields = ['dob', 'first_name', 'last_name',  'basal_dose']
     labels = {'dob': "Date of Birth"}
     widgets = {'dob': forms.SelectDateWidget(years=BIRTH_YEAR_CHOICES)}
+
+class OtpForm(forms.Form):
+    code = forms.CharField(label="Code")
+    
+class ExpressAccessTokenForm(forms.Form):
+    token = forms.CharField(label="token", widget=forms.HiddenInput)
+     # class Meta:
+        # model = ExpressAccessToken
+        # fields = [ "token"]
+        # #widgets = {'token': forms.HiddenInput()}
+
+class ExpressAccessLogForm(LogForm, ExpressAccessTokenForm):
+    '''
+        form to add new log using express access token.
+    '''
+
+class LoginForm(forms.Form):
+    username = forms.CharField(label = 'Username')
+    password = forms.CharField(label='Enter password', widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        username = cleaned_data.get("username")
+        password = cleaned_data.get("password")
+        user = authenticate(username = username,  password = password)
+        if user is  None:
+          #  login(request, user)
+            raise ValidationError(
+                "Invalid username or password "
+                )
 
 class LinkUserForm(forms.Form):
   username = forms.CharField(label = 'Username')

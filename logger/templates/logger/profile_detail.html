@@ -1,0 +1,36 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+
+<div class="box-container">
+<div class="box">
+
+        <h2>Profile Settings</h2>
+
+    <table>
+        <tr>
+            <td>Two Factor Authentication enabled:</td>
+            <td>{{profile.otp_enabled}}</td>
+        </tr>
+    </table>
+
+
+
+{{log.as_table}}
+
+    <div class="">           
+
+        <!-- Update button -->
+        <a class="button-warning pure-button" href="{% url 'logger:ProfileSettingsUpdateView'  %}">Update</a>
+
+        <!-- Back button -->
+        <a class="button-grey pure-button" href="{% url 'logger:ProfileSettingsView'  %}">Back</a>
+    </div>
+
+</div>
+
+</div>
+
+
+{% endblock %}

@@ -7,7 +7,7 @@
             <div class="col text-align-center">
                 <!-- Date -->
                 <div class="row">
-                    <a class="btn btn-xs btn-info" href="{% url 'logger:LogView' log.id %}"><small>{{ log.date }}</small></a>
+                    <a class="btn btn-xs btn-info" href="{% url 'logger:LogDetailView' log.id %}"><small>{{ log.date }}</small></a>
                 </div>
 
             </div>
@@ -61,6 +61,30 @@
                     </div>
                     <div>
                         <span class="border p-1 m-0 rounded-right">{{log.basal}}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if log.steps %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #00b0b9">Steps</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.steps}}</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if log.notes %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #ffff99">notes</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.notes}}</span>
                     </div>
                 </div>
                 {% endif %}

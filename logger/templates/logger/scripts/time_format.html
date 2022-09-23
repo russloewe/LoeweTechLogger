@@ -1,0 +1,29 @@
+<script>
+
+
+function time_format(id) {
+    var dt2= document.getElementById(id).value;
+    var dt = dt2.replace(/\D/g,'');
+    var formattedText = '';
+    if(dt.length < 3){
+         formattedText = dt;
+    }
+    if(dt.length >= 3){
+         formattedText  = dt.slice(0,2) + ':' + dt.slice(2,4);
+    }
+    document.getElementById(id).value = formattedText ;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Loaded: time_format.html");
+  console.log("adding event listeners to time input fields");
+    var inputs = ['start', 'end'] ;
+    inputs.map(function (label){
+         var id = 'id_'+label;
+         document.getElementById(id).onchange = function(){ time_format(id)};
+         document.getElementById(id).onkeyup = function(){ time_format(id)};
+     });
+});
+
+
+</script>

@@ -21,11 +21,16 @@
         
     </div>
     <div class="class-footer">
-        <a class="btn btn-primary m-3" href="{% url 'logger:ProfileUpdateView' %}">
+        <a class="button-secondary pure-button" href="{% url 'logger:ProfileUpdateView' %}">
             Edit Profile
         </a>
-        <a class="btn btn-primary m-3" href="{% url 'logger:ProfileUpdatePasswordView' %}">
+        <a class="button-secondary pure-button" href="{% url 'logger:ProfileUpdatePasswordView' %}">
             Change Password
         </a>
+         <a href="{% url 'logger:PatientCreateView' %}"
+               class="button-secondary pure-button">
+                New Patient
+            </a>
+            <a class="button-secondary pure-button" href="{% url 'logger:ProfileSettingsView' %}">Settings</a>
     </div>
 </div>

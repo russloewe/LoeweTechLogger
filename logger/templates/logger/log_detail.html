@@ -1,0 +1,36 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+
+<div class="box-container">
+<div class="box">
+
+        <h2>Log: {{log.date}}</h2>
+
+
+
+        {% include 'logger/comps/error_snippit.html' %}
+
+        {% include 'logger/comps/log_table.html' %}
+
+{{log.as_table}}
+
+    <div class="card-footer">           
+
+        <!-- Update button -->
+        <a class="button-warning pure-button" href="{% url 'logger:LogUpdateView' log.id %}">Update</a>
+
+        <!-- Delete button -->
+        <a class="button-error pure-button" href="{% url 'logger:LogDeleteView' log.id%}">Delete</a>
+        
+        <!-- Back button -->
+        <a class="button-grey pure-button" href="{% url 'logger:LogListCreateView' log.patient_id %}">Back</a>
+    </div>
+
+</div>
+
+</div>
+
+
+{% endblock %}

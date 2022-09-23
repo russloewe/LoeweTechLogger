@@ -1,0 +1,16 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+<div class="box-container">
+    <div class="box bg-white pure-u-11-12">
+    <form method="post">{% csrf_token %}
+        <p>Are you sure you want to delete:</p>
+        {% include 'logger/comps/dosewindow_table.html' with dose=dosewindow %}
+        {{ form }}
+        <input class="button-error pure-button" type="submit" value="Confirm">
+        <a class="button-grey pure-button" href="{% url 'logger:DoseWindowListCreateView' patient.id %}">Back</a>
+    </form>
+    </div>
+</div>
+{% endblock %}

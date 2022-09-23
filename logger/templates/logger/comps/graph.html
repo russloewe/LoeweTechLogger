@@ -7,6 +7,12 @@
     <button id="6hr_button" class="btn btn-sm btn-secondary m-1">6 hours</button>
     <button id="12hr_button" class="btn btn-sm btn-secondary m-1">12 hours</button>
     <button id="24hr_button" class="btn btn-sm btn-secondary m-1">24 hours</button>
+    {% if lastDoseTime %}
+        <text id="lastInsulin"> Last Insulin Dose: {{lastDoseTime}}</text>
+    {% endif %}
+    {% if lastDoseRelTime %}
+        <text id="lastInsulin"> Last  Dose: {{lastDoseRelTime}}</text>
+    {% endif %}
 </div>
 
 
@@ -17,8 +23,9 @@
     const duration_24hr = moment.duration("24:00:00");
 
     var current_duration = duration_6hr;
+    
     var bgData = [
-        {% for data in bgData %}
+        {% for data in graphData.bg %}
             {
                 x: moment(
                     {{ data.date.timestamp}}
@@ -29,7 +36,7 @@
     ];
     
     var inData = [
-        {% for data in inData %}
+        {% for data in graphData.in %}
             {
                 x: moment(
                     {{ data.date.timestamp}}
@@ -38,11 +45,44 @@
             },
         {% endfor %}
     ];
+    
 
+    var stepsData = [
+        {% for data in graphData.steps %}
+            {
+                x: moment(
+                    {{ data.date.timestamp}}
+                    ),
+                y: {{data.value}}
+            },
+        {% endfor %}
+    ];
+    var carbData = [
+        {% for data in graphData.carbs %}
+            {
+                x: moment(
+                    {{ data.date.timestamp}}
+                    ),
+                y: {{data.value}}
+            },
+        {% endfor %}
+    ];
+    
     var config = {
 
     data: {
-        datasets: [{
+        datasets: [
+        {
+            label: 'Carbs',
+            type: 'scatter',
+            borderColor: '#00aa00',
+            backgroundColor: '#11ff11',            
+            pointStyle: "triangle",
+            pointRadius: 8,
+            data: carbData,
+            fill: false,
+            yAxisID: 'y-axis-0',
+        },{
             label: 'Blood Sugar',
             type: 'scatter',
             backgroundColor: 'red',
@@ -54,12 +94,24 @@
             label: 'Insulin',
             type: 'bar',
             backgroundColor: 'blue',
-            borderColor: 'blue',
             data: inData,
             borderColor: 'white',
             borderWidth: 1,
+            barThickness: 12,
+            maxBarThickness: 16,
             yAxisID: 'y-axis-1'
-        },]
+        },
+        {
+            label: 'Steps',
+            type: 'bar',
+            backgroundColor: '#00b0b9',
+            data: stepsData,
+            borderColor: 'white',
+            borderWidth: 1,
+            barThickness: 8,
+            maxBarThickness: 12,
+            yAxisID: 'y-axis-2'},
+        ]
     },
    
     options: {
@@ -124,7 +176,7 @@
                 position: 'left',
                 scaleLabel: {
                     display: true,
-                    labelString: 'Blood Sugar'
+                    labelString: 'Blood Sugar & Carbs'
                 },
                 ticks: {
                     beginAtZero: true,
@@ -140,9 +192,21 @@
                 },
                 ticks: {
                     beginAtZero: true,
-                    max: 20
+                    max: 40
                 }
-            }]
+            },{
+                id: 'y-axis-2',
+                display: false,
+                position: 'right',
+                scaleLabel:{
+                    display: true,
+                    labelString: 'Steps'
+                },
+                ticks:{
+                    beginAtZero: true,
+                    max: 1200
+                    }
+                }]
         }
     }
 };

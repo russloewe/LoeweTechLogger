@@ -1,10 +1,39 @@
 {% csrf_token %}
+<!-- Render form errors here -->
 {% if form.error %}
     {% include 'logger/comps/form_error_card.html' %}
 {% endif %}
-{% for field in form %}
-    <div class="fieldWrapper">
-        {{ field.errors }}
-        {{ field.label_tag }} {{ field }}
+
+{% for error in form.non_field_errors %}
+    <div class="alert alert-danger">
+        <strong>{{ error|escape }}</strong>
     </div>
 {% endfor %}
+
+<div>
+    <!-- Hidden form fields here -->
+    {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+    <!-- Visible fields here -->
+
+    <table class="form-snippet">
+    {% for field in form.visible_fields %}
+        {% if field.errors %}
+        <tr class="form-snippet">
+            {{ field.errors }}
+        </tr>
+        {% endif %}
+        <tr class="form-snippet">
+            <td class="form-snippet">
+                {{ field.label_tag }} 
+            </td>
+            <td class="form-snippet">
+                {{ field }}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+
+
+</div>

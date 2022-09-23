@@ -12,6 +12,11 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import random
+import string
+from django.contrib.auth.models import User
+from django.core.mail import send_mail, EmailMessage
+from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import loader
@@ -19,7 +24,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 import pytz
 from datetime import datetime
-from django.views import generic
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView, FormView
 from django.utils import timezone
 from django.utils.timezone import localtime
 from django.contrib.auth.decorators import login_required, permission_required
@@ -27,11 +34,19 @@ from django.contrib.auth import  login, logout, authenticate
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from .models import Log, Patient
-from .forms import LogForm, UpdateLogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm
+from django.core.exceptions import ValidationError
+import environ
+from twilio.rest import Client
+from .models import Log, Patient, DoseWindow, Otp, Profile, ExpressAccessToken
+from .forms import LoginForm, OtpForm, LogForm, UpdateLogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm, DoseWindowForm, ExpressAccessTokenForm, ExpressAccessLogForm
 from .plots import  ordinal, Chart
+from django.core.mail import EmailMessage
 
-
+# reading .env file
+env = environ.Env()
+environ.Env.read_env()
+twilio_account_sid = env('TWILIO_ACCOUNT_SID')
+twilio_auth_token = env('TWILIO_AUTH_TOKEN')
 
 
 # Our own mix up
@@ -70,6 +85,14 @@ class SiteView(LoginRequiredMixin, View):
       template = loader.get_template('logger/views/errorView.html')
       return(HttpResponse(template.render(context, request)))
 
+def render_error(request, message):
+    '''
+        Send basic error message to browser.
+    '''
+    context = {'error_message': message}
+    return render(request, 'logger/error.html', context)
+
+
 
 # Views Start Here
 
@@ -88,164 +111,125 @@ def index(request):
         # if this profile has more than 1 patient go to a different page
         # but for now go to first patient in list.
       patient = patients[0]
-      return redirect('logger:PatientView', patient.id)
+      return redirect('logger:LogListCreateView', patient.id)
     else:
       return redirect('logger:PatientListView')
   else:
     return redirect('logger:LoginView')
 
-# LOG VIEWS
-        
-class LogView( SiteView):
-  '''
-    View the details of a single log
-  '''
+# Site Generic Views
+class PatientItemListCreateView(SiteView, ListView):
 
-  permission_required = ('logger.view_log')
-    
-  def get(self, request, pk):
-      log = get_object_or_404(Log, pk=pk)
-      context = {'log': log} # also success_message and error_message
-      return render(request, 'logger/views/logView.html', context)
+    def get_queryset(self):
+        pk = self.kwargs['pk']
+        if self.model == Log:
+            return(self.model.objects.filter(patient_id = pk, steps=None).order_by(self.order_by)[:20])
+        return(self.model.objects.filter(patient_id = pk).order_by(self.order_by)[:20])
 
-class LogCreateView(SiteView):
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        pk = self.kwargs['pk']
+        patient = get_object_or_404(Patient, pk=pk)
+        context['patient'] = patient
+        #context['lastDoseRelTime'] = patient.lastDoseRelTime()
+        context['form'] = self.form(initial = {'patient' : patient, 'user': self.request.user, 'date':datetime.now() })
+        return context
 
-  def post(self, request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
-    form = LogForm(request.POST)
-    if patient.user.id == request.user.id or request.user in patient.connected.all():
-      if form.is_valid():
-        basal = None
-        if form.cleaned_data['basalcheck']:
-          basal = form.cleaned_data['basal']
-        log = Log.objects.create(user = request.user,
-                                  insulin = form.cleaned_data['insulin'],
-                                  bloodsugar = form.cleaned_data['bloodsugar'],
-                                  carbs = form.cleaned_data['carbs'],
-                                  steps = form.cleaned_data['steps'],
-                                  bp_high = form.cleaned_data['bp_high'],
-                                  bp_low = form.cleaned_data['bp_low'],
-                                  patient = patient,
-                                  basal = basal,
-                                  date=timezone.now(),
-                                  )
-        try:
-          log.save()
-          return redirect('logger:PatientView', pk)
-        except Exception as e:
-          context = {'error_message' : str(e)}
-          return render(request, 'logger/views/errorView.html', context)
-      else:
-        context = {'form': form, 'patient': patient}
-        return render(request, 'logger/views/LogCreateView.html', context)
-    else:
-      context = {"error_message": "You don't have permission to create logs for that patient."}
-      return render(request, 'logger/views/errorView.html', context)
 
-class LogUpdateView(SiteView):
-    ''' Edit a log. 
-                '''
-    def get(self, request, pk):
-        log = get_object_or_404(Log, pk=pk) # load log
-        form = UpdateLogForm(instance=log)
-      
-        context = {'form': form,
-                   'log_id': log.id}
-        # GET render edit page
-        return render(request, 'logger/views/LogUpdateView.html', context)
-        
     def post(self, request, pk):
-          log = get_object_or_404(Log, pk=pk) # load log
-      
-          form = UpdateLogForm(request.POST, instance=log)
+        patient = get_object_or_404(Patient, pk=pk)
+        form = self.form(request.POST)
+        if patient.user.id == request.user.id or request.user in patient.connected.all():
           if form.is_valid():
             try:
+                form.cleaned_data['patient'] = patient
+                form.cleaned_data['user'] = self.request.user
                 form.save()
-            # Update Failure
+                return redirect(self.list_url_name, patient.id)
             except Exception as e:
-                context = {'error_message': str(e)}
-                return render(request, 'logger/views/errorView.html', context)
-            else:
-              return redirect('logger:LogView', log.id)
+              context = {'error_message' : str(e)}
+              return render(request, 'logger/views/errorView.html', context)
           else:
-            context = {'form': form, 'log_id': log.id}
-            return render(request, 'logger/views/LogUpdateView.html', context)
-
-class LogDeleteView(SiteView):
+            context = {'error': 'error', 'form': form, 'patient': patient, self.model.__name__.lower()+'_list': self.model.objects.filter(patient_id = patient.id).order_by(self.order_by)}
+            return render(request, "logger/{}_list.html".format( self.model.__name__.lower()), context)
+        else:
+          context = {"error_message": "You don't have permission to create/edit entires for that patient."}
+          return render(request, 'logger/views/errorView.html', context)
+        
+class GenericPatientItem(SiteView):
     
-    def get(self, request, pk):
-
-      log = get_object_or_404(Log, pk=pk)
-      
-      # Check permissions
-      if request.user not in [log.user, log.patient.user]:
-        context = {'log': log,
-          'error_message':"""You don't have permission to delete this log.
-          Only user that created the log or the patient's owner account can delete logs."""}
-        return render(request, 'logger/views/LogDeleteView.html', context)
-      else:
-        # Render the view
-        context = {'log': log}
-        return render(request, 'logger/views/LogDeleteView.html', context)
- 
+    #Overload the success url func to go to the item's patient list page of that item
+    def get_success_url(self):
+        pk = self.kwargs['pk']
+        model = get_object_or_404(self.model, pk=pk)
+        patient = model.patient
+        return(reverse(self.list_url_name, args=[patient.id]))
     
-    def post(self, request, pk):
-      log = get_object_or_404(Log, pk=pk)
-      patient = log.patient
-      context = {'log': log}
+    #Overload context func to add patient to contenx
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        #Add patient to context
+        pk = self.kwargs['pk']
+        dw = get_object_or_404(self.model, pk=pk)
+        context['patient'] = dw.patient
+        return context
+        
+#DOSE CARD VIEWS
+class DoseWindowListCreateView(PatientItemListCreateView):
+    model = DoseWindow
+    form = DoseWindowForm
+    order_by = 'id'
+    list_url_name = 'logger:DoseWindowListCreateView'
 
-      # Check permissions
-      if request.user not in [log.user, log.patient.user]:
-        context = {'log': log,
-          'error_message':"""You don't have permission to delete this leg.
-          Only user that created the log or the patient's owner account can delete logs."""}
-        return render(request, 'logger/views/LogDeleteView.html', context)
-      else:
-        # Delete log or error message
-        try:
-            log.delete()
-            return redirect('logger:PatientView', patient.id)
-        except Exception as e:
-            context = {'log': log,
-              'error_message':"Failed to delete log."}
-            return render(request, 'logger/views/LogDeleteView.html', context)
+class DoseWindowDeleteView(GenericPatientItem,  DeleteView):
+    model = DoseWindow
+    list_url_name = 'logger:DoseWindowListCreateView'
+    
+        
+class DoseWindowUpdateView(GenericPatientItem, UpdateView):
+    model = DoseWindow
+    fields = ['label', 'days', 'start', 'end', 'carb_ratio', 'correction_start', 'correction_step', 'active']
+    list_url_name = 'logger:DoseWindowListCreateView'
+    template_name_suffix = '_update'
+    
 
+# LOG VIEWS
+        
+class LogDetailView( GenericPatientItem, DetailView ):
+    '''View the details of a single log '''
+    model = Log
+    permission_required = ('logger.view_log')
+
+class LogListCreateView(PatientItemListCreateView):
+    model = Log
+    order_by = '-date'
+    form = LogForm
+    list_url_name = 'logger:LogListCreateView'
+  
+class LogAddView(GenericPatientItem):
+    '''Confirm adding the new log'''
+    model = Log
+    template_name_suffix = '_add'
+    list_url_name = 'logger:LogListCreateView'
+
+class LogUpdateView(GenericPatientItem, UpdateView):
+    ''' Edit a log. 
+                '''
+    model = Log
+    fields = ["date", "bloodsugar", "carbs", "insulin", "basal",  "steps", "notes"]
+    template_name_suffix = '_update'
+    list_url_name = 'logger:LogListCreateView'
+   
+class LogDeleteView(GenericPatientItem,  DeleteView):
+    model = Log
+    list_url_name = 'logger:LogListCreateView'
+    
+    
 
 # PATIENT VIEWS
-
-class PatientView(SiteView):
-    '''
-    This page displays a single user's page with components such as
-    recent logs, log adder, quickstats, etc...
-    ''' 
-    def get(self, request, pk):
-        ''' Render Form '''
-        patient = get_object_or_404(Patient, pk=pk)
-
-        if patient.user.id == request.user.id or request.user in patient.connected.all():
-          # Get the patient's logs
-          logs = patient.getLogs()
-          # Graph past BG
-          bgData = patient.getBG()
-          inData = patient.getIN()
-          #carbData = patient.getCarb()
-          # New log Form
-          form = LogForm(initial={'patient': patient.id,
-                'datetime': datetime.now(),
-                'basal': patient.basal_dose})
-          context = { 'patient': patient,
-                      'logs' : logs,
-                      'form': form,
-                      'bgData': bgData,
-                      'inData': inData,
-                      'carbData': bgData
-                      }
-          return render(request, 'logger/views/PatientView.html', context)
-        else:
-          context = {'error_message': '''You don't have permission to
-                                    view that patient'''}
-          return render(request, 'logger/views/errorView.html', context)
-
 class PatientLinkView(SiteView):
 
   def get(self, request, pk):
@@ -274,7 +258,6 @@ class PatientLinkView(SiteView):
       context = {'form': form, 'patient': patient}
       return render(request, 'logger/views/PatientLinkView.html', context)
 
-
 class PatientUnlinkView(SiteView):
 
   def get(self, request, pk):
@@ -302,154 +285,152 @@ class PatientUnlinkView(SiteView):
       context = {'form': form, 'patient': patient}
       return render(request, 'logger/views/PatientUnlinkView.html', context)
 
-class PatientListView(SiteView):
-  
-  def get(self, request):
-    user_patients = Patient.objects.filter(user_id = request.user.id)
-    connected_patients = Patient.objects.filter(connected = request.user.id)
-    patients = user_patients | connected_patients
-    context = {'patients': patients}
-    return render(request, 'logger/views/PatientListView.html', context)
+class PatientListView(SiteView, ListView):
+    model = Patient
 
-class PatientDetailView(SiteView):
+    def get_queryset(self):
+        user_patients = Patient.objects.filter(user_id = self.request.user.id)
+        connected_patients = Patient.objects.filter(connected =self.request.user.id)
+        patients = user_patients | connected_patients
+        return(user_patients | connected_patients)
+   
+class PatientDetailView(SiteView, DetailView):
     '''
     This page displays a single user's page with components such as
     recent logs, log adder, quickstats, etc...
     ''' 
-    def get(self, request, pk):
-        ''' Render Form '''
-        patient = get_object_or_404(Patient, pk=pk)
+    model = Patient
 
-        if patient.user.id == request.user.id or request.user in patient.connected.all():
-          context = { 'patient': patient
-                      }
-          return render(request, 'logger/views/PatientDetailView.html', context)
-        else:
-          context = {'error_message': '''You don't have permission to
-                                    view that patient'''}
-          return render(request, 'logger/views/errorView.html', context)
-
-class PatientUpdateView(SiteView):
+class PatientUpdateView(SiteView, UpdateView):
     '''
     This view displays an input form with patient attributes filled in
     and handls the form submission to update a patient in the db
     ''' 
-    def get(self, request, pk):
-        ''' Render Form '''
-        patient = get_object_or_404(Patient, pk=pk)
-        if request.user.id != patient.user.id and request.user not in patient.connected.all():
-          context = {'error_message': 'You cannot edit that patient. Only the patient owner account or linked account may make changes.'}
-          return render(request, 'logger/views/errorView.html', context)
-        else:
-          form = PatientForm(instance=patient)
-          context = { 'patient': patient, 'form': form}
-          return render(request, 'logger/views/PatientUpdateView.html', context)
+    model = Patient
+    fields = ['dob', 'first_name', 'last_name', 'basal_dose']
+    template_name_suffix = '_update'
 
-    def post(self, request, pk):
-      patient = get_object_or_404(Patient, pk=pk)
-      form = PatientForm(request.POST, instance=patient)
-      if form.is_valid():
-        form.save()
-        return redirect('logger:PatientDetailView', pk)
-      else:
-        context = { 'patient': patient, 'form': form}
-        return render(request, 'logger/views/PatientUpdateView.html', context)
+    def get_success_url(self):
+        pk = self.kwargs['pk']
+        model = get_object_or_404(self.model, pk=pk)
+        p_id = model.id
+        return(reverse('logger:PatientDetailView', args=[p_id]))
+    
+class PatientDeleteView(SiteView, DeleteView):
+    model = Patient
+    success_url = reverse_lazy('logger:PatientListView')
+  
 
-class PatientDeleteView(SiteView):
+class PatientCreateView(SiteView, CreateView):
+    model = Patient
+    fields = ['dob', 'first_name', 'last_name', 'carb_ratio', 'correction_start', 'correction_step', 'basal_dose']
+    success_url = reverse_lazy('logger:ProfileView')
+    template_name_suffix = "_create"
+    
+    def form_valid(self, form):
+         user = self.request.user
+         form.instance.user = user
+         return super(PatientCreateView, self).form_valid(form)
 
-    def get(self, request, pk):
-      patient = get_object_or_404(Patient, pk=pk)
-      
-      # Check permission
-      if request.user.id != patient.user.id:
-        context = {'patient': patient,
-          'error_message': """You cannot delete that patient. 
-            Only the patient owner account may make changes."""}
-        return render(request, 'logger/views/PatientDeleteView.html', context)
-      else:
-        # Render the view
-        context = {'patient': patient}
-        return render(request, 'logger/views/PatientDeleteView.html', context)
 
-    def post(self, request, pk):
-      patient = get_object_or_404(Patient, pk=pk)
-      
-      # Check permission
-      if request.user.id != patient.user.id:
-        context = {'patient': patient,
-          'error_message': """You cannot delete that patient. 
-            Only the patient owner account may make changes."""}
-        return render(request, 'logger/views/PatientDeleteView.html', context)
-      else:
-        try:
-          patient.delete()
-          return redirect('logger:ProfileView')
-        except Exception as e:
-          context = {'patient': patient,
-            'error_message': "Unable to delete patient."}
-          return render(request, 'logger/views/PatientDeleteView.html', context)
-
-class PatientCreateView(SiteView):
-
-  def get(self, request):
-    form = PatientForm()
-    context = { 'form' : form}
-    return render(request, 'logger/views/PatientCreateView.html', context)
-
-  def post(self, request):
-    try:
-      form = PatientForm(request.POST)
-      if form.is_valid():
-        patient = form.save(commit=False)
-        patient.user_id = request.user.id
-        patient.save()
-        return HttpResponseRedirect(reverse('logger:ProfileView'), request)
-      else:
-        context = { 'form' : form}
-        return render(request, 'logger/views/PatientCreateView.html', context)
-    except Exception as e:
-      context = { 'error_message': str(e)}
-      return render(request, 'logger/views/errorView.html', context)
 # USER VIEWS
+class OtpView(FormView):
+    template_name = 'logger/otp.html'
+    form_class = OtpForm
+    
+    def get(self, request, pk):
 
-class LoginView(View):
+        otp_code = self.request.GET.get('otp_code')
+        if otp_code is not None:
+            otp= get_object_or_404(Otp, endpoint=self.kwargs['pk'])
+            if otp_code != otp.code:
+                return(render(self.request, self.template_name, {'form': form, 'error_message': "Bad OTP code"}))
+            user = otp.user
+            if user is None:
+                return(render(self.request, self.template_name, {'form': form, 'error_message': "Bad OTP code"}))
+            login(self.request, user)
+            #return(redirect(reverse(otp.success_url)))
+            # mannually redirect to patient list view
+            return(redirect(reverse('logger:PatientListView')))
+        else:
+            return(super(OtpView, self).get(request, pk))
 
-  def get(self, request):
-    try:
-      self.next = request.GET['next']
-    except Exception:
-      pass
-    # On GET request just render login page
-    context = {}
-    return render(request, 'logger/views/userLoginView.html', context)
+    def post(self, request, pk):
+        form = OtpForm(request.POST)
+        if form.is_valid():
+            otp= get_object_or_404(Otp, endpoint=pk)
+            otp_code = form.cleaned_data['code']
+            user = User.objects.get(pk = otp.user.id)
+            if user is not None:
+                if otp.code == otp_code:
+                    login(self.request, user)
+                    otp.delete()
+                    return(redirect(reverse('logger:PatientListView')))
+            else:
+                return(render(request, 'logger/otp.html', {'form': form, 'error_message': "Bad OTP code"}))
+        else:
+            return(render(request, 'logger/otp.html', {'form': form}))
 
-  def post(self, request):
-    try:
-      username = request.POST['username']
-      password = request.POST['password']
-    except Exception:
-      context = {'error_message': "Something wack with your request",
-      }
-      return render(request, 'logger/views/userLoginView.html', context)
+        
+class LoginView(FormView):
+    template_name = 'logger/login.html'
+    form_class = LoginForm
+    success_url = reverse_lazy('logger:PatientListView')
+    
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        
+        # First use submitted credentials to authenticate user
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user = authenticate(username = username, password = password)
+        
+        if user is not None:
+            
+            # If user is valid load profile info and check if 2FA is 
+            # enabled
+            profile = Profile.objects.get(user=user)
+            if profile.otp_enabled:
+                
+                # If 2FA is enabled, first load user cell number
+                cell_number = profile.cell_number
+                
+                # Then genarate random number as code
+                code = random.randrange(100000, 800000, 1)
+                
+                # Then generate random endpoint url for this code
+                endpoint = ''.join([random.choice(''.join([string.ascii_uppercase, string.ascii_lowercase])) for i in range(30)])
+                
+                # Save the code and endpoint in database
+                otp = Otp.objects.create(user = user, code=code, endpoint=endpoint, success_url=self.success_url)
+                
+                if cell_number != None:
+                    # Create and send SMS message to user
+                    client = Client(twilio_account_sid, twilio_auth_token)
+                    message = client.messages.create(
+                         body="Loewe Tech Logger\nYour one time code is: {}".format(code),
+                         from_='+17473024930',
+                         to= cell_number
+                     )    
+                
+                # Format and send email
+                msg_html = render_to_string('logger/comps/email_otp.html', {'otp_code': code, 'otp_endpoint': endpoint, 'request': self.request})
+                msg = EmailMessage(subject="Otp Code", body=msg_html, from_email='logger@loewetechsoftware.com', bcc=[user.email])
+                msg.content_subtype = "html"  # Main content is now text/html
+                msg.send()
+                
+                # Redirect user to the genarted OTP endpoint
+                return(redirect(reverse('logger:OtpView', args=[endpoint])))
+            else:
+                # If user doesnt have OTP enbled just log them in
+                login(self.request, user)
+        return super().form_valid(form)
 
-    # Try to retreive the user from the backend 
-    user = authenticate(username = username,
-    password = password)
-    if user is not None:
-      # log the user in
-      login(request, user)
-      # send them on their way or bounce to homepage
-      try:
-       # next = self.next
-        return HttpResponseRedirect(next, request)
-      except Exception:
-        response = HttpResponseRedirect(reverse('logger:index'), request)
-        return response
-    else:
-      # If user is none then send back to login page to try again
-      context = {'error_message': "Something wack with auth"}
-      return render(request, 'logger/views/userLoginView.html', context)
-
+class AdminLoginView(LoginView):
+    template_name = 'logger/login.html'
+    form_class = LoginForm
+    success_url = '/admin/'
+    
 class LogoutView(View):
 
   def get(self, request):
@@ -519,6 +500,33 @@ class ProfileUpdatePasswordView(SiteView):
     else:
       return render(request, 'logger/views/ProfileUpdatePasswordView.html', {'form': form})
 
+class ProfileSettingsView( SiteView, DetailView ):
+    '''View the details of a single log '''
+    model = Profile
+    permission_required = ('logger.view_log')
+    
+    def get_object(self):
+        user = self.request.user
+        return(get_object_or_404(Profile, user=user))
+
+class GraphView(SiteView, DetailView):
+  model = Patient
+  template_name_suffix = "_graphs"
+
+
+
+class ProfileSettingsUpdateView(SiteView, UpdateView):
+    ''' Edit a log. 
+                '''
+    model = Profile
+    fields = ["otp_enabled"]
+    template_name_suffix = '_update'
+    success_url = reverse_lazy('logger:ProfileSettingsView')
+    
+    def get_object(self):
+        user = self.request.user
+        return(get_object_or_404(Profile, user=user))
+   
 # DATA IO VIEWS
 
 class ExportView(SiteView):

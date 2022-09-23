@@ -1,0 +1,29 @@
+<nav class="navbar">
+    <div class="navbar">
+      <a class="navbar" href="{% url 'logger:index' %}">Home</a>
+    
+      {% block page_links %}{% endblock %}
+      {% if patient %}
+        <a class="navbar" href="{% url 'logger:PatientDetailView' patient.id%}">Patient Details</a>
+        <a class="navbar" href="{% url 'logger:LogListCreateView' patient.id%}">Patient Dashboard</a>
+        <a class="navbar" href="{% url 'logger:GraphView' patient.id%}">Patient Graphs</a>
+      {% endif %}
+    </div>
+    
+    
+    {% if request.user.is_authenticated %}   
+    <div class="navbar">
+      <a class="navbar" href="{% url 'logger:ProfileView' %}">My Profile</a>
+      <a class="navbar" href="{% url 'logger:PatientListView' %}">My Patients</a>
+      <a class="navbar" href="{% url 'logger:LogoutView' %}">Logout</a>
+    </div>
+{% else %}
+<div id="loginButton" class="m-0 p-1">
+        <a class="btn btn-light" href="{% url 'logger:RegisterView' %}">Sign up</a>
+    </div>
+    <div id="loginButton" class="m-0 p-1">
+        <a class="btn btn-light" href="{% url 'logger:LoginView' %}">Login</a>
+    </div>
+{% endif %}
+    
+</nav>

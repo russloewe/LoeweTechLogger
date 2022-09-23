@@ -1,0 +1,50 @@
+{% if dose.created %}{{dose.created}}{% endif %}
+
+<table>
+    <tr>
+        <td>Effective Date</td>
+        <td>{{dose.effective_date}}</td>
+        <td>Basal Dose: </td>
+        <td>{{dose.basal_dose}}</td>
+    </tr>
+    <tr>
+        <th>Dose Window</th>
+        <th>start time</th>
+        <th>end time</th>
+        <th>carb ratio</th>
+        <th>correction start</th>
+        <th>correction step </th>
+    </tr>
+    <tr>
+        <td>Breakfast</td>
+        <td>{{dose.breakfast_start}}</td>
+        <td>{{dose.breakfast_end}}</td>
+        <td>{{dose.breakfast_carb_ratio}}</td>
+        <td>{{dose.breakfast_correction_start}}</td>
+        <td>{{dose.breakfast_correction_step}}</td>
+    </tr>
+    <tr>
+        <td>Lunch</td>
+        <td>{{dose.lunch_start}}</td>
+        <td>{{dose.lunch_end}}</td>
+        <td>{{dose.lunch_carb_ratio}}</td>
+        <td>{{dose.lunch_correction_start}}</td>
+        <td>{{dose.lunch_correction_step}}</td>
+    </tr>
+<tr>
+    <td>Dinner</td>
+    <td>{{dose.dinner_start}}</td>
+    <td>{{dose.dinner_end}}</td>
+    <td>{{dose.dinner_carb_ratio}}</td>
+    <td>{{dose.dinner_correction_start}}</td>
+    <td>{{dose.dinner_correction_step}}</td>
+</tr>
+<tr>
+    <td>Base </td>
+    <td></td>
+    <td></td>
+    <td>{{dose.carb_ratio}}</td>
+    <td>{{dose.correction_start}}</td>
+    <td>{{dose.correction_step}}</td>
+</tr>
+</table>
