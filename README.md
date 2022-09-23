@@ -1,4 +1,17 @@
-#Installation
+# About 
+
+This is an open source web app for logging Type 1 Diabetes numbers.
+
+# Project Goals:
+
+
+
+- **Free**, I started this because I couldn't find a quality app that wasn't limited for free use.
+- **Simple**, This needs to be as bare bones as possible while still serving it's functions.
+- **Low Maintence**, Use as few libraries as possible to reduce maintance labor.
+
+
+# Installation
 
 ## Option 1 Install Remotely with SSH
 
