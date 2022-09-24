@@ -7,74 +7,40 @@ This is an open source web app for logging Type 1 Diabetes numbers.
 
 
 - **Free**, I started this because I couldn't find a quality app that wasn't limited for free use.
-- **Simple**, This needs to be as bare bones as possible while still serving it's functions.
+- **Simple**, The platform needs to be as bare bones as possible while still serving it's functions.
 - **Low Maintence**, Use as few libraries as possible to reduce maintance labor.
 
 
 # Installation
 
-## Option 1 Install Remotely with SSH
+This project has been deveploped to run on Ubuntu server. The project is based on Django, so it could theoretically run anywhere. However, other OS's might not have compatible Python libraries that this project depends on. 
 
-### Setup Environment variables
+To install first open ./loewetechsoftware_com/.env and fill out the following variables:
 
-First, the variables that both the setup script and the Django app require
-are defined in the environment file:
+	SECRET_KEY= {random string about 50 chars}
+	EMAIL_HOST_PASSWORD= { backend email router, we use zoho.com}
+	EMAIL_HOST_USER=
+	PASS= {remote server's root pass}
+	DBDIR=/var/db_logger {remote server's path for sqlite db}
+	VENDIR=/var/venv_logger {remote path for virtural python environment}
+	APPSRC=/home/russell/Dropbox/loewetechsoftware_com { local workstatoin absolute path where source is download}
+	APPDIR=/var/loewetechsoftware_com {remote path to django app source}
+	HOST={domain name for remote server}
+	TWILIO_ACCOUNT_SID=
+	TWILIO_AUTH_TOKEN=
 
-		loewetechsoftware_com/loewetechsoftware_com/.env
+Then open ./load.sh in the project root, and uncomment the following lines if not already:
+	
+	
+	InitSSHKeys
+	SetupFirewall
+	InstallDependencies
+	SetupDjangoServer
+	SetupVenv
+	InitDB
+	SetupPostgresql
+	SetupApache
+	SetupCertBot
+	GetApacheErrorLogs
 
-The initial .env file will need to be filled out fresh from the repo.
-The variables are:
-
-##### SECRET_KEY
-
-Used by the django app. use long, random string
-
-##### EMAIL_HOST_PASSWORD + EMAIL_HOST_USER
-
-The login username and password for the email service. This is currently
-Zoho.
-
-##### PASS
-
-Root password for remote server.
-
-##### REMOTE_USER + REMOTE_PASS
-
-Password and username for remote server.
-
-##### DBDIR
-
-Directory where sqlite3 database file will be stored on the remote server
-when sqlite3 is used as the database backend.
-
-##### VENDIR
-
-Directory where python3 virtual environment will be on the remote server. 
-Do not us a sub directory of the app folder or updates to the server's code
-will wipe the database. Recomend using /var/db_loewetech
-
-##### APPSRC
-##### APPDIR
-##### HOST
-##### SSLDIR
-
-##Setup database
-
-###Option 1: sqlite
-use a local sqlite database. Setup the database with the command
-
-
-	./manage.py migrate
-
-###Option 2: Setup Postrgesql server
-The details for the postgre server are in docker-compase.yaml
-Run the commands to start the server:
-
-    ./docker_compose pull
-    ./docker_compuse up
-
-
-
-## Backup sqlite database weekly on Sunday at midnight cron line :
-
-    0 0 * * 0 /home/russell/Dropbox/loewetechsoftware_com/scripts/backup_sqlite_db.sh  2>&1 > /home/russell/Dropbox/loewetechsoftware_com/db/backup_db.log
+Then execute ./load.sh 
