@@ -13,8 +13,8 @@
                         <h3>Errors</h3>
                     {% endif %}
                  {% include 'logger/comps/dosewindow_table.html' with dose=form %}
-        <input class="button-warning pure-button" type="submit" value="Update">
-        <a class="button-grey pure-button" href="{% url 'logger:DoseWindowListCreateView' patient.id %}">Back</a>
+        <input class="button-secondary" type="submit" value="Update">
+        <a class="button-back" href="{% url 'logger:DoseListView' patient.id %}">Back</a>
     </form>
     </div>
 </div>

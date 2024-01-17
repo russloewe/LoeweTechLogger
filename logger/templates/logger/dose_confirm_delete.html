@@ -9,7 +9,7 @@
         {% include 'logger/comps/dosewindow_table.html' with dose=dosewindow %}
         {{ form }}
         <input class="button-error pure-button" type="submit" value="Confirm">
-        <a class="button-grey pure-button" href="{% url 'logger:DoseWindowListCreateView' patient.id %}">Back</a>
+        <a class="button-back" href="{% url 'logger:DoseListCreateView' patient.id %}">Back</a>
     </form>
     </div>
 </div>

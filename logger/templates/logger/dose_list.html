@@ -1,0 +1,41 @@
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+{% include 'logger/scripts/time_format.html' %}
+
+<div class=" mx-auto">
+   
+        
+    <div class="card p-2 mt-2">
+        <h1>Dose Window List</h1>
+        {% if dose_list %}
+        <ul class="list-group">
+        {% for dosewindow in dose_list %}
+          <li class="list-group-item">
+                        {% include 'logger/comps/dosewindow_table.html' with dose=dosewindow %}
+          </li>
+          <li>
+            <table>
+            <tr>
+                <td>{{dosewindow.label}}</td>
+                <td><a class="button-danger" href="{% url 'logger:DoseDeleteView' dosewindow.id %}">Delete</a></td>
+                <td><a class="button-secondary" href="{% url 'logger:DoseUpdateView' dosewindow.id %}">Update</a></td>
+            </tr>
+            </table>
+
+          </li>
+        {% endfor %}
+        </ul>
+        {% else %}
+        <p>There are no dose windows on file.</p>
+        {% endif %}
+        <div>
+        <h4>New Dose Window</h4>
+        <a class="button-secondary" href="{% url 'logger:DoseCreateView' patient.id %}">New Dose Window</a>
+        </div>
+    </div>
+        
+
+</div>
+{% endblock %}

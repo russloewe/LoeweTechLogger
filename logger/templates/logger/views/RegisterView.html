@@ -12,8 +12,8 @@
         <form method="post" action="{% url 'logger:RegisterView' %}" >
             {% include 'logger/comps/form_snippit.html' %}
             <div class="row">
-                <input class="btn btn-primary m-3" type="submit" value="Register">
-                <a class='btn btn-secondary m-3' href="{% url 'logger:LoginView' %}">Back</a>
+                <input class="button-secondary pure-button" type="submit" value="Register">
+                <a class="button-back" href="{% url 'logger:LoginView' %}">Back</a>
             </div>
         </form>
         

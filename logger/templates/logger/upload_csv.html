@@ -1,0 +1,18 @@
+
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+{% if row_count %}
+    <p>{{ row_count }} rows uploaded</p>
+{% endif %}
+{% if skip_count %}
+    <p>{{ skip_count }} rows not loaded.</p>
+{% endif %}
+    <h2>Upload CSV</h2>
+    <form method="post" enctype="multipart/form-data" action="{% url 'logger:upload_csv' patient.id %}">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit">Upload</button>
+    </form>
+{% endblock %}

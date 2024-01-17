@@ -15,12 +15,12 @@ function reset_datatime(){
     var second = today.getSeconds();
     second = second < 10 ? '0' + second : second;
     var formattedDate = year + '-' + month +'-'+ day +' '+hour+':'+minute+':'+second;
-    document.getElementById('id_datetime').value = formattedDate;
+    document.getElementById('id_date').value = formattedDate;
 }
 
-function date_format(id) {
-    var dt2= document.getElementById(id).value;
-    var dt = dt2.replace(/\D/g,''); // remove non num
+function datetime_format() {
+    var dt2= document.getElementById('id_date').value;
+    var dt = dt2.replace(/\D/g,'');
     var formattedText = '';
     if(dt.length < 5){
          formattedText = dt;
@@ -28,12 +28,19 @@ function date_format(id) {
     if(dt.length < 7 & dt.length >= 5){
          formattedText  = dt.slice(0,4) + '-' + dt.slice(4,6);
     }
-    if(dt.length >= 7){
+    if(dt.length < 9 & dt.length >= 7){
         formattedText  = dt.slice(0,4) + '-' + dt.slice(4,6)+'-'+dt.slice(6,8);
     }
-
-    document.getElementById(id).value = formattedText ;
+    if(dt.length <11 & dt.length >= 9){
+        formattedText  = dt.slice(0,4) + '-' + dt.slice(4,6)+'-'+dt.slice(6,8)+' '+dt.slice(8,10);
+    }
+    if( dt.length >= 11){
+        formattedText  =dt.slice(0,4) + '-' + dt.slice(4,6)+'-'+dt.slice(6,8)+' '+dt.slice(8,10)+':'+dt.slice(10,12);
+    }
+    document.getElementById('id_date').value = formattedText ;
 }
+
+
 
 function add_reset_button(){
     
@@ -52,22 +59,28 @@ function add_reset_button(){
     a.style.borderRadius = "25px"; 
     a.style.color = 'rgb(73, 80, 87)';
     a.style.backgroundColor = '#e6e6e6';
-    document.getElementById('id_datetime').parentElement.prepend(a);
+    document.getElementById('id_date').parentElement.prepend(a);
 }
 
+function update_time(){
+     if(document.getElementById('time-active').checked) {
+        console.log('active');
+        reset_datatime();
+        }else{
+            console.log('disabled')
+        }
+    }
+        
+
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("Loaded: date_format.html");
-    var inputs = ['datetime', 'dob'] ;
-    inputs.map(function (label){
-         var id = 'id_'+label;
-         try{
-             document.getElementById(id).onchange = function(){ date_format(id)};
-             document.getElementById(id).onkeyup = function(){ date_format(id)};
-         }catch(err){
-             console.log(err);
-            }
-     });
+  console.log("Loaded: datetime_formate.html");
+    document.getElementById('id_date').onchange = datetime_format;
+    document.getElementById('id_date').onkeyup = datetime_format;
+
+
+    // add_reset_button();
+     
+     setInterval(update_time, 1000);
+
 });
-
-
 </script>

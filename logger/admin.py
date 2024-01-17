@@ -14,15 +14,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from django.contrib import admin
-from .models import Log, Patient, DoseWindow, Profile, Otp, Days, ExpressAccessToken
-from rest_framework.authtoken.admin import TokenAdmin
+from .models import Log, Patient, Dose, Profile, ExpressToken
 
-TokenAdmin.raw_id_fields = ['user']
+
 # Register your models here.
 admin.site.register(Log)
 admin.site.register(Patient)
 admin.site.register(Profile)
-admin.site.register(DoseWindow)
-admin.site.register(Otp)
-admin.site.register(Days)
-admin.site.register(ExpressAccessToken)
+admin.site.register(Dose)
+admin.site.register(ExpressToken)

@@ -19,13 +19,13 @@
     <div class="card-footer">           
 
         <!-- Update button -->
-        <a class="button-warning pure-button" href="{% url 'logger:LogUpdateView' log.id %}">Update</a>
+        <a class="button-warning" href="{% url 'logger:LogUpdateView' log.id %}">Update</a>
 
         <!-- Delete button -->
-        <a class="button-error pure-button" href="{% url 'logger:LogDeleteView' log.id%}">Delete</a>
+        <a class="button-danger " href="{% url 'logger:LogDeleteView' log.id%}">Delete</a>
         
         <!-- Back button -->
-        <a class="button-grey pure-button" href="{% url 'logger:LogListCreateView' log.patient_id %}">Back</a>
+        <a class="button-back " href="{% url 'logger:LogListCreateView' log.patient_id %}">Back</a>
     </div>
 
 </div>

@@ -1,38 +1,71 @@
+<!DOCTYPE html>
 <html>
     <head>
-         <!-- Favicon -->
+        <title>
+            {% if title %}{{title}}{% else %}LoeweTech Logger{% endif %}
+        </title>
+        <!-- Favicon -->
         <link href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB8lBMVEUAAAAwGgrcejK5ZyoxGwv/jjrBaywzHAs0HAv//3X//6I5Hw1wPhn//7SpXib/q0bYeDE0HQz/1VeCSB3/mT5YMBP6izkEAgHAayv//8zNci5MKhGWVCKQUCCNTiCHSx+rXyfBayy+aivAaivAayuiWiWzYyjWdzDrgjXngDTPcy+sYCfPcy/ifjOKTR8/Iw7cejLWdzCNTiChWiSvYSinXSafWCSqXyetYCegWSSSUSGoXSbmgDTvhTbHby3Ocy/ifjPTdTDcejLmgDTZeTHWdzDkfjTJby3DbCzuhDbogTWxYih8RRzefDLbejKjWyXifjPQdC+zYyjkfzTQdC/TdTDffDJXMBS6aCrWdzCuYSezYyjqgjXsgzW+aisAAADUdjDGbi12QhvffDPTdTCtYCe0ZCnVdzDIby3xhjbkfzSdVyO8aCqwYih1QRq2ZSnqgjXvhTbEbSyjWiW+aiveezLjfjPRdC/ZeTEAAAAGBQOrXyfRdC/kfzTUdjDRdC/bejLmgDTPcy/ffDPMcS6TUiGrXyehWSSvYSexYiipXiaXVCK1ZSnsgzXrgjW4ZirQcy/ifjOGSx6WVCLGbi3efDLsgzXhfTPEbSyRUSGNTiC6ZyrBayy9aSvAayy5ZyqJTB/yhjfyhzfzhzfxhjb////cdzfTAAAAoXRSTlMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABkzMDAzE0u+7+enM3vKFQWvlAkUFhQUFRUUDh/e/ll81bTF1L+51YJN+ucoC8WmMs9+N919hr0HMsBTZez1PwGnWgu+hS50t8H91BdkKwQ86f1gFES85siiAgE8r9GwqMXWttxoCRUTFRYUEEr07jN5zBMUidLw2YgRCC4xLzEsBUqxtO4AAAABYktHRKUuuUovAAAAB3RJTUUH4wwfBQUpqIDHhgAAANVJREFUGNNjYEAHjEwKikrKKqrMMAEWVjV1DU0tbTaYADsHp85CXT0ubrgeHn2DRYa8RsYmpmbmFpZWDAx81ja2dvz2Do5Ozi6ubu4MDAIenl7ePr5+/gGLAoOCQxgEhUIXhoVHREZFx8TGxSckMggnJS9MEUlNS8/IzMqOz8llyMsvKCwqLiktK19cUSlaxcBQXVNbW1ff0NjUvKRFTBxoa2tbe3tHZ1d3T29fvwTcLeIMkhMWTpwkJQ0TkJk8Zeq06TNmysIE5GbNnjN33vwF8gyYAACCjjjavybuMgAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0xMi0zMVQwNTowNTo0MSswMTowMFm08NEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMTItMzFUMDU6MDU6NDErMDE6MDAo6UhtAAAAV3pUWHRSYXcgcHJvZmlsZSB0eXBlIGlwdGMAAHic4/IMCHFWKCjKT8vMSeVSAAMjCy5jCxMjE0uTFAMTIESANMNkAyOzVCDL2NTIxMzEHMQHy4BIoEouAOoXEXTyQjWVAAAAAElFTkSuQmCC" rel="icon" type="image/x-icon" />
-    
-        <script>
-            function getURLFragment(key){
-                var hash = window.location.hash.substr(1);
-                var result = hash.split('&').reduce(function (result, item) {
-                    var parts = item.split('=');
-                    result[parts[0]] = parts[1];
-                    return result;
-                }, {});
-                return result[key];
-            }
-            
-            document.addEventListener("DOMContentLoaded", () => {
-                var token = getURLFragment('token');
-                console.log(token);
-                document.getElementById('id_token').value = token;
-                document.expressAccessForm.submit();
-            });
-         
-            
-        </script>
-    </head>
-    <body>
-        <div class="box">
-            <h3>Express Login</h3>
 
-            <form method="post" action="{% url 'logger:ExpressView' %}" name="expressAccessForm">
-                {% include 'logger/comps/form_snippit.html' %}
-                <input type="submit" form="expressAccessForm" value="Submit" >
-            </form>
+        <style type="text/css" media="print">
+            
+                table {
+                  border-collapse: collapse;
+                  width: 100%;
+                  font-size: 8px; /* adjust font size as needed */
+                }
+
+                th, td {
+                  text-align: left;
+                  padding: 8px;
+                  border-bottom: 1px solid #ddd;
+                  font-size: 8px; /* adjust font size as needed */
+                }
+
+                tr:nth-child(even) {
+                  background-color: #f2f2f2;
+                }
+
+                tr:hover {
+                  background-color: #ddd;
+                }
+
+                th {
+                  background-color: #4CAF50;
+                  color: white;
+                }
+
+                td {
+                  border-right: 1px solid #ddd;
+                }
+        </style>
+
+    </head>
+    <body >
         
-        </div> 
+    <div class="">
+        <h1 class="text-center text-light">
+            {{patient.first_name}} {{patient.last_name}} 
+        </h1>
+        <h4>DOB: {{patient.dob}}</h4>
+    
+
+        <table>
+            <tr>
+                <th>datetime</th> <th>Blood Sugar</th> <th>Carbs</th> <th>Insulin</th> <th>Notes</th> 
+            </tr>
+            {% for log in log_list %}
+            <tr>
+                <td>{{log.date}}</td><td>{{log.bloodsugar}}</td><td>{{log.carbs}}</td><td>{{log.insulin}}</td><td>{{log.notes}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+    </div>
+
     </body>
 </html>
+
+
+
+

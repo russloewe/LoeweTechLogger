@@ -8,24 +8,30 @@ function round(number){
 function update_insulin() {
   var bg = document.getElementById('bloodsugar-helper').value;
   var carb = document.getElementById('carbs-helper').value;
+  var arrow = document.getElementById('arrow-helper').value;
+  
+  // check input
   if(isNaN(bg)){
       bg = 0;
   };
   if(isNaN(carb)){
       carb = 0;
   };
+  if(isNaN(arrow)){
+      arrow = 0;
+  };
   
-  var insulin = Number(bg) + Number(carb);
+  var insulin = Number(bg) + Number(carb) + Number(arrow);
   console.log('suggested dose: ', insulin);
   document.getElementById('insulin-helper').value = round(insulin);
 }
 
 
 function update_bg() {
-  const bg_start = {{dose.correction_start}};
-  const bg_step = {{dose.correction_step}};
+  const bg_start = {{dose.correction_start}}; // Target BG
+  const bg_step = {{dose.correction_step}}; // Correction Facton
   const bg = document.getElementById('id_bloodsugar').value;
-  var insulin = ((bg - bg_start )/ bg_step) + 1 ; // insulin calc here
+  var insulin = ((bg - bg_start )/ bg_step)  ; // insulin calc here
   if(insulin < 0.5){
     document.getElementById('bloodsugar-helper').value = 0;
   }else{
@@ -48,9 +54,75 @@ function update_carbs() {
 
 function update_basal() {
   document.getElementById('id_basal').value = {{dose.basal_dose}};
-
 }
 
+function update_arrow() {
+  const arrow = document.getElementById('id_direction').value
+  const bg_step = {{dose.correction_step}};
+  let cf;  // Correction Factor
+  
+   // Use blood sugar correction step to determ CF group
+  if(bg_step < 25){
+      cf = 'lt_25';
+  } else if(bg_step < 50){
+    cf = 'lt_50';
+  } else if(bg_step < 75 ){
+    cf = 'lt_75';
+  } else if(bg_step >= 75){
+    cf = 'gt_75';
+  };
+  
+  // look up the correction in dictionary. see readme for references 
+  let correction = arrowDictionary[arrow][cf];
+  
+  document.getElementById('arrow-helper').value = correction;
+  update_insulin();
+}
+
+var arrowDictionary = {
+  'fast_up': {
+    'lt_25': 4.5,
+    'lt_50': 3.5,
+    'lt_75': 2.5,
+    'gt_75': 1.5
+  },
+  'up': {
+    'lt_25': 3.5,
+    'lt_50': 2.5,
+    'lt_75': 1.5,
+    'gt_75': 1.0
+  },
+  'slow_up': {
+    'lt_25': 2.5,
+    'lt_50': 1.5,
+    'lt_75': 1.0,
+    'gt_75': 0.5
+  },
+  'steady': {
+    'lt_25': 0,
+    'lt_50': 0,
+    'lt_75': 0,
+    'gt_75': 0
+  },
+  'slow_down': {
+    'lt_25': -2.5,
+    'lt_50': -1.5,
+    'lt_75': -1.0,
+    'gt_75': -0.5
+  },
+  'down': {
+    'lt_25': -3.5,
+    'lt_50': -2.5,
+    'lt_75': -1.5,
+    'gt_75': -1.0
+  },
+  'fast_down': {
+    'lt_25': -4.5,
+    'lt_50': -3.5,
+    'lt_75': -2.5,
+    'gt_75': -1.5
+  }
+};
 function add_basal_button(){
     
     var a = document.createElement('div');
@@ -81,6 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('id_carbs').onkeyup = update_carbs;
     document.getElementById('id_bloodsugar').onchange = update_bg;
     document.getElementById('id_bloodsugar').onkeyup = update_bg;
+    document.getElementById('id_direction').onchange = update_arrow;
      add_basal_button();
     
 });

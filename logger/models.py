@@ -19,10 +19,11 @@ from datetime import datetime
 import pytz
 import math
 from django.utils import timezone
-from .graphs import weekly_stats
 from django.contrib.auth.models import User
-from .plots import ordinal
 # Create your models here.
+import csv
+from io import TextIOWrapper
+
 
 DAYS_OF_WEEK = (
     (0, 'Monday'),
@@ -34,24 +35,6 @@ DAYS_OF_WEEK = (
     (6, 'Sunday'),
 )
 
-class Days(models.Model):
-    day = models.CharField(max_length=8)
-    
-    def __str__(self):
-        return(self.day)
-
-class Otp(models.Model):
-    created = models.DateTimeField(auto_now = True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    endpoint =  models.CharField(max_length=40)
-    success_url = models.CharField(max_length=50)
-    code = models.CharField(max_length=50)    
-    
-    def __str__(self):
-        return("{} {} {}".format(self.created, self.user, self.success_url))
-
-
-    
 class Patient(models.Model):
     user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL, related_name="owner")
     connected = models.ManyToManyField(User, related_name="connected_users")
@@ -59,79 +42,32 @@ class Patient(models.Model):
     first_name = models.CharField(max_length=40)
     last_name = models.CharField(max_length=40)
     basal_dose = models.IntegerField(default=0)
-    
-    def getGraphData(self, n=30):
-        logs = self.log_set.order_by('date')
-        if logs == None or len(logs) < 1:
-            return(None)
-        steps= []
-        carbs = []
-        bg = []
-        In = []
-        for log in logs:
-            if(log.steps) and (log.steps > 0):
-                steps.append({'date': log.getJSDateTime(), 'value': log.steps})
-            if(log.insulin) and (log.insulin > 0):
-                In.append({'date': log.getJSDateTime(), 'value': log.insulin})
-            if(log.carbs) and (log.carbs > 0):
-                carbs.append({'date': log.getJSDateTime(), 'value': log.carbs})
-            if(log.bloodsugar) and (log.bloodsugar > 0):
-                bg.append({'date': log.getJSDateTime(), 'value': log.bloodsugar})
-        return({'steps': steps[-n:], 'in':In[-n:], 'carbs':carbs[-n:], 'bg': bg[-n:]})
-
-    def getTDD(self):
-        today = pd.Timestamp.today().tz_localize('America/Los_Angeles')
-        end = (today - pd.Timedelta(days=(1) ))
-        start = (today - pd.Timedelta(days=(14) ))
-        
-        logs = self.log_set.filter(date__gte=start.strftime('%Y-%m-%d'), date__lte=end.strftime('%Y-%m-%d'))
-        # df = pd.DataFrame(logs.values('date','insulin'))
-        # df_recent = df#[(df['date'] > start) & (df['date'] <= end)]
-        sum_insulin = 0
-        sum_basal = 0
-        for log in logs:
-            if log.insulin:
-                sum_insulin += log.insulin
-            if log.basal:
-                sum_basal += log.basal
-        tdd = round((sum_insulin + sum_basal ) / 14)
-        low_dose = round(tdd * .4)
-        high_dose = round(tdd * .5)
-        return({ 'tdd' : tdd, 'low': low_dose, 'high': high_dose})
-    
-    def getGraphs(self):
-        # today = pd.Timestamp.today().tz_localize('America/Los_Angeles')
-        # end = (today - pd.Timedelta(days=(0) ))
-        # start = (today - pd.Timedelta(days=(14) ))
-        logs = self.log_set#.filter(date__gte=start)
-        df = pd.DataFrame(logs.values())
-        g = weekly_stats(df)
-        return(g)
-        
-        
-        
-        
+  
     def getDose(self):
         weekday = datetime.today().weekday()
-        dosewindows = self.dosewindow_set.filter(days = weekday)
-        if len(dosewindows) >= 1: 
+        weekday_name = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][weekday]
+        
+        Doses = self.patient.all().filter(**{weekday_name: True})
+        #Doses = self.Dose_set.filter(**{weekday_name: True})
+        #Doses = self.Dose_set.filter(days = weekday)
+        if len(Doses) >= 1: 
             now = datetime.now().time()
             
-            for dosewindow in dosewindows:
-               # days = [ i for i in dosewindow.days]              
+            for Dose in Doses:
+               # days = [ i for i in Dose.days]              
                 #raise Exception("day: {}".format(days))
                 #raise Exception('{}-{}'.format(start, end))
-                start = dosewindow.start
-                end = dosewindow.end
+                start = Dose.start
+                end = Dose.end
                 # if end == '00:00:00':
                     # end = '24:00:00'
                 # raise Exception('{}-{}'.format(start, end))
-                if now > start and now < end and dosewindow.active:
+                if now > start and now < end and Dose.active:
                     
-                    return({'label' : dosewindow.label,
-                                  'carb_ratio': dosewindow.carb_ratio,
-                                  'correction_start': dosewindow.correction_start,
-                                  'correction_step': dosewindow.correction_step,
+                    return({'label' : Dose.label,
+                                  'carb_ratio': Dose.carb_ratio,
+                                  'correction_start': Dose.correction_start,
+                                  'correction_step': Dose.correction_step,
                                   'basal_dose': self.basal_dose})
         return ({  'label': 'base',
                           'carb_ratio': 0,
@@ -148,7 +84,7 @@ class Patient(models.Model):
       return(non_steps[:40])
       
     def __str__(self):
-        self.graph = self.getGraphData()
+        # self.graph = self.getGraphData()
         return("{} {} ({})".format(self.first_name, self.last_name, self.id))
     
     def lastDoseRelTime(self):
@@ -165,16 +101,23 @@ class Patient(models.Model):
                     minutes = math.floor((delta.seconds/60)%60)
                     return("{} hours {} min ago".format(hours, minutes))
 
-class DoseWindow(models.Model):
+class Dose(models.Model):
     active = models.BooleanField(default=True)
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    days = models.ManyToManyField(Days)
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="patient")
     label = models.CharField(max_length=40)
     start = models.TimeField(null=True)
     end = models.TimeField(null=True)
     carb_ratio = models.IntegerField(default=0)
     correction_start = models.IntegerField(default=0)
     correction_step = models.IntegerField(default=0)
+    
+    Monday = models.BooleanField(default=False, null=True)
+    Tuesday = models.BooleanField(default=False, null=True)
+    Wednesday = models.BooleanField(default=False, null=True)
+    Thursday = models.BooleanField(default=False, null=True)
+    Friday = models.BooleanField(default=False, null=True)
+    Saturday = models.BooleanField(default=False, null=True)
+    Sunday = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return("Patient: {} {}, window: {}".format(self.patient.first_name, self.patient.last_name, self.label))
@@ -189,6 +132,16 @@ class Profile(models.Model):
         return("{}".format(self.user.username))
 
 class Log(models.Model):
+    DIRECTION_CHOICES = [
+        ('fast_up', 'Fast Up'),
+        ('up', 'Up'),
+        ('slow_up', 'Slow Up'),
+        ('steady', 'Steady'),
+        ('slow_down', 'Slow Down'),
+        ('down', 'Down'),
+        ('fast_down', 'Fast Down'),
+    ]
+    
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     date = models.DateTimeField('Timestamp')
@@ -200,6 +153,7 @@ class Log(models.Model):
     basal = models.FloatField(blank=True, null=True)
     steps = models.FloatField(blank=True, null=True)
     token_used = models.CharField(max_length=50, null=True, blank=True)
+    direction = models.CharField(max_length=20, choices=DIRECTION_CHOICES, null=True, blank=True)
     
     class Meta:
             # This constraint is for the cron job that updates records
@@ -253,7 +207,7 @@ class Log(models.Model):
         this_hour = now.hour
         this_minute = now.minute
 
-        # format day compontent
+        # format day compontentordinal
         #if(day == today):
            # day = "Today"
 
@@ -280,9 +234,64 @@ class Log(models.Model):
             minute = '0' + str(minute)
         text = "{}, {} at {}:{} {}".format(month_day, year, hour, minute, ampm)
         return(text)
+    
+    @classmethod
+    def create_from_csv_row(cls, row, patient, user):
+        
+        # First double check that the user is the same
+        csv_patient_id = int(row.get('patient_id'))
+        patient_id = int(patient.id)
+        
+        if csv_patient_id == patient_id:
+            date_str = row.get('date', '')
+            date_obj = None
+            try:
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S.%f')
+            except:
+                date_obj = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+            
+            field_mapping = {
+                'date': row.get('date', ''),
+                'notes': row.get('notes', ''),
+                'insulin': row.get('insulin', ''),
+                'carbs': row.get('carbs', ''),
+                'bloodsugar': row.get('bloodsugar', ''),
+                'basalcheck': row.get('basalcheck', ''),
+                'basal': row.get('basal', ''),
+                'steps': row.get('steps', ''),
+                'token_used': row.get('token_used', ''),
+                'direction': row.get('direction', ''),
+            }
 
+            # Replace empty strings with None
+            for field, value in field_mapping.items():
+                if value == '':
+                    field_mapping[field] = None
+                    
+            #date_obj = date_obj.replace(tzinfo=pytz.UTC)
+            # try:
+            log = cls(
+                patient=patient,
+                user=user,
+                date=date_obj,  
+                notes=field_mapping['notes'],
+                insulin=field_mapping['insulin'],
+                carbs=field_mapping['carbs'],
+                bloodsugar=field_mapping['bloodsugar'],
+                basalcheck=field_mapping['basalcheck'],
+                basal=field_mapping['basal'],
+                steps=field_mapping['steps'],
+                token_used=field_mapping['token_used'],
+                direction=field_mapping['direction'],
+            )
+            log.save()
+            return log
+            # except:
+                # return None
+        else:
+            return None
 
-class ExpressAccessToken(models.Model):
+class ExpressToken(models.Model):
     ''' Holds data for the express access token which lets a user
         bypass logging in for limited access to a patient.
         Note: only the user that created the patient may create an 
@@ -293,5 +302,6 @@ class ExpressAccessToken(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     label = models.CharField(max_length=40)
     token = models.CharField(max_length=40, unique=True)
-    qr_path = models.CharField(max_length=100, null=True, blank=True)
+    qr_img = models.CharField(max_length=5000, null=True, blank=True)
+    qr_img_code = models.CharField(max_length=5000, null=True, blank=True)
     active =  models.BooleanField(default=True)

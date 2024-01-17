@@ -14,8 +14,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import random
 import string
+import csv
 from django.contrib.auth.models import User
-from django.core.mail import send_mail, EmailMessage
 from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -35,20 +35,9 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-import environ
-from twilio.rest import Client
-from .models import Log, Patient, DoseWindow, Otp, Profile, ExpressAccessToken
-from .forms import LoginForm, OtpForm, LogForm, UpdateLogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm, DoseWindowForm, ExpressAccessTokenForm, ExpressAccessLogForm
-from .plots import  ordinal, Chart
-from django.core.mail import EmailMessage
-
-# reading .env file
-env = environ.Env()
-environ.Path('../loewetechsoftware_com')
-environ.Env.read_env()
-twilio_account_sid = env('TWILIO_ACCOUNT_SID')
-twilio_auth_token = env('TWILIO_AUTH_TOKEN')
-
+from .models import Log, Patient, Dose, Profile, ExpressToken
+from .forms import LoginForm, CustomUserCreationForm, UserForm
+from .forms import UploadCSVForm
 
 # Our own mix up
 class SiteView(LoginRequiredMixin, View):
@@ -92,7 +81,6 @@ def render_error(request, message):
     '''
     context = {'error_message': message}
     return render(request, 'logger/error.html', context)
-
 
 
 # Views Start Here
@@ -177,202 +165,8 @@ class GenericPatientItem(SiteView):
         dw = get_object_or_404(self.model, pk=pk)
         context['patient'] = dw.patient
         return context
-        
-#DOSE CARD VIEWS
-class DoseWindowListCreateView(PatientItemListCreateView):
-    model = DoseWindow
-    form = DoseWindowForm
-    order_by = 'id'
-    list_url_name = 'logger:DoseWindowListCreateView'
 
-class DoseWindowDeleteView(GenericPatientItem,  DeleteView):
-    model = DoseWindow
-    list_url_name = 'logger:DoseWindowListCreateView'
-    
-        
-class DoseWindowUpdateView(GenericPatientItem, UpdateView):
-    model = DoseWindow
-    fields = ['label', 'days', 'start', 'end', 'carb_ratio', 'correction_start', 'correction_step', 'active']
-    list_url_name = 'logger:DoseWindowListCreateView'
-    template_name_suffix = '_update'
-    
-
-# LOG VIEWS
-        
-class LogDetailView( GenericPatientItem, DetailView ):
-    '''View the details of a single log '''
-    model = Log
-    permission_required = ('logger.view_log')
-
-class LogListCreateView(PatientItemListCreateView):
-    model = Log
-    order_by = '-date'
-    form = LogForm
-    list_url_name = 'logger:LogListCreateView'
-  
-class LogAddView(GenericPatientItem):
-    '''Confirm adding the new log'''
-    model = Log
-    template_name_suffix = '_add'
-    list_url_name = 'logger:LogListCreateView'
-
-class LogUpdateView(GenericPatientItem, UpdateView):
-    ''' Edit a log. 
-                '''
-    model = Log
-    fields = ["date", "bloodsugar", "carbs", "insulin", "basal",  "steps", "notes"]
-    template_name_suffix = '_update'
-    list_url_name = 'logger:LogListCreateView'
-   
-class LogDeleteView(GenericPatientItem,  DeleteView):
-    model = Log
-    list_url_name = 'logger:LogListCreateView'
-    
-    
-
-# PATIENT VIEWS
-class PatientLinkView(SiteView):
-
-  def get(self, request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
-    if patient.user.id != request.user.id:
-      context = {'error_message': 'Only the patient owner can link accounts.'}
-      return render(request, 'logger/views/errorView.html', context)
-    else:
-      form = LinkUserForm()
-      context = {'form': form, 'patient': patient}
-      return render(request, 'logger/views/PatientLinkView.html', context)
-  
-  def post(self, request, pk):
-    # Check permissions first
-    patient = get_object_or_404(Patient, pk=pk)
-    if patient.user.id != request.user.id:
-      context = {'error_message': 'Only the patient owner can link accounts.'}
-      return render(request, 'logger/views/errorView.html', context)
-    # Validate form second
-    form = LinkUserForm(request.POST)
-    if form.is_valid():
-      user = form.cleaned_data['username']
-      patient.connected.add(user.id)
-      return HttpResponseRedirect(reverse('logger:PatientDetailView', args=[patient.id]), request)
-    else:
-      context = {'form': form, 'patient': patient}
-      return render(request, 'logger/views/PatientLinkView.html', context)
-
-class PatientUnlinkView(SiteView):
-
-  def get(self, request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
-    if patient.user.id != request.user.id:
-      context = {'error_message': 'Only the patient owner can link accounts.'}
-      return render(request, 'logger/views/errorView.html', context)
-    else:
-      form = UnlinkUserForm(instance=patient)
-      context = {'form': form, 'patient': patient}
-      return render(request, 'logger/views/PatientUnlinkView.html', context)
-  
-  def post(self, request, pk):
-    patient = get_object_or_404(Patient, pk=pk)
-    form = UnlinkUserForm(request.POST, instance=patient)
-    if patient.user.id != request.user.id:
-      context = {'error_message': 'Only the patient owner can link accounts.'}
-      return render(request, 'logger/views/errorView.html', context)
-    if form.is_valid():
-      user = form.cleaned_data['connected']
-      patient.connected.remove(user)
-      patient.save()
-      return redirect('logger:PatientDetailView', pk=patient.id)
-    else:
-      context = {'form': form, 'patient': patient}
-      return render(request, 'logger/views/PatientUnlinkView.html', context)
-
-class PatientListView(SiteView, ListView):
-    model = Patient
-
-    def get_queryset(self):
-        user_patients = Patient.objects.filter(user_id = self.request.user.id)
-        connected_patients = Patient.objects.filter(connected =self.request.user.id)
-        patients = user_patients | connected_patients
-        return(user_patients | connected_patients)
-   
-class PatientDetailView(SiteView, DetailView):
-    '''
-    This page displays a single user's page with components such as
-    recent logs, log adder, quickstats, etc...
-    ''' 
-    model = Patient
-
-class PatientUpdateView(SiteView, UpdateView):
-    '''
-    This view displays an input form with patient attributes filled in
-    and handls the form submission to update a patient in the db
-    ''' 
-    model = Patient
-    fields = ['dob', 'first_name', 'last_name', 'basal_dose']
-    template_name_suffix = '_update'
-
-    def get_success_url(self):
-        pk = self.kwargs['pk']
-        model = get_object_or_404(self.model, pk=pk)
-        p_id = model.id
-        return(reverse('logger:PatientDetailView', args=[p_id]))
-    
-class PatientDeleteView(SiteView, DeleteView):
-    model = Patient
-    success_url = reverse_lazy('logger:PatientListView')
-  
-
-class PatientCreateView(SiteView, CreateView):
-    model = Patient
-    fields = ['dob', 'first_name', 'last_name', 'carb_ratio', 'correction_start', 'correction_step', 'basal_dose']
-    success_url = reverse_lazy('logger:ProfileView')
-    template_name_suffix = "_create"
-    
-    def form_valid(self, form):
-         user = self.request.user
-         form.instance.user = user
-         return super(PatientCreateView, self).form_valid(form)
-
-
-# USER VIEWS
-class OtpView(FormView):
-    template_name = 'logger/otp.html'
-    form_class = OtpForm
-    
-    def get(self, request, pk):
-
-        otp_code = self.request.GET.get('otp_code')
-        if otp_code is not None:
-            otp= get_object_or_404(Otp, endpoint=self.kwargs['pk'])
-            if otp_code != otp.code:
-                return(render(self.request, self.template_name, {'form': form, 'error_message': "Bad OTP code"}))
-            user = otp.user
-            if user is None:
-                return(render(self.request, self.template_name, {'form': form, 'error_message': "Bad OTP code"}))
-            login(self.request, user)
-            #return(redirect(reverse(otp.success_url)))
-            # mannually redirect to patient list view
-            return(redirect(reverse('logger:PatientListView')))
-        else:
-            return(super(OtpView, self).get(request, pk))
-
-    def post(self, request, pk):
-        form = OtpForm(request.POST)
-        if form.is_valid():
-            otp= get_object_or_404(Otp, endpoint=pk)
-            otp_code = form.cleaned_data['code']
-            user = User.objects.get(pk = otp.user.id)
-            if user is not None:
-                if otp.code == otp_code:
-                    login(self.request, user)
-                    otp.delete()
-                    return(redirect(reverse('logger:PatientListView')))
-            else:
-                return(render(request, 'logger/otp.html', {'form': form, 'error_message': "Bad OTP code"}))
-        else:
-            return(render(request, 'logger/otp.html', {'form': form}))
-
-        
+# USER VIEWS 
 class LoginView(FormView):
     template_name = 'logger/login.html'
     form_class = LoginForm
@@ -391,40 +185,40 @@ class LoginView(FormView):
             # If user is valid load profile info and check if 2FA is 
             # enabled
             profile = Profile.objects.get(user=user)
-            if profile.otp_enabled:
+            # if profile.otp_enabled:
                 
-                # If 2FA is enabled, first load user cell number
-                cell_number = profile.cell_number
+                # # If 2FA is enabled, first load user cell number
+                # cell_number = profile.cell_number
                 
-                # Then genarate random number as code
-                code = random.randrange(100000, 800000, 1)
+                # # Then genarate random number as code
+                # code = random.randrange(100000, 800000, 1)
                 
-                # Then generate random endpoint url for this code
-                endpoint = ''.join([random.choice(''.join([string.ascii_uppercase, string.ascii_lowercase])) for i in range(30)])
+                # # Then generate random endpoint url for this code
+                # endpoint = ''.join([random.choice(''.join([string.ascii_uppercase, string.ascii_lowercase])) for i in range(30)])
                 
-                # Save the code and endpoint in database
-                otp = Otp.objects.create(user = user, code=code, endpoint=endpoint, success_url=self.success_url)
+                # # Save the code and endpoint in database
+                # otp = Otp.objects.create(user = user, code=code, endpoint=endpoint, success_url=self.success_url)
                 
-                if cell_number != None:
-                    # Create and send SMS message to user
-                    client = Client(twilio_account_sid, twilio_auth_token)
-                    message = client.messages.create(
-                         body="Loewe Tech Logger\nYour one time code is: {}".format(code),
-                         from_='+17473024930',
-                         to= cell_number
-                     )    
+                # if cell_number != None:
+                    # # Create and send SMS message to user
+                    # client = Client(twilio_account_sid, twilio_auth_token)
+                    # message = client.messages.create(
+                         # body="Loewe Tech Logger\nYour one time code is: {}".format(code),
+                         # from_='+17473024930',
+                         # to= cell_number
+                     # )    
                 
-                # Format and send email
-                msg_html = render_to_string('logger/comps/email_otp.html', {'otp_code': code, 'otp_endpoint': endpoint, 'request': self.request})
-                msg = EmailMessage(subject="Otp Code", body=msg_html, from_email='logger@loewetechsoftware.com', bcc=[user.email])
-                msg.content_subtype = "html"  # Main content is now text/html
-                msg.send()
+                # # Format and send email
+                # msg_html = render_to_string('logger/comps/email_otp.html', {'otp_code': code, 'otp_endpoint': endpoint, 'request': self.request})
+                # msg = EmailMessage(subject="Otp Code", body=msg_html, from_email='logger@loewetechsoftware.com', bcc=[user.email])
+                # msg.content_subtype = "html"  # Main content is now text/html
+                # msg.send()
                 
-                # Redirect user to the genarted OTP endpoint
-                return(redirect(reverse('logger:OtpView', args=[endpoint])))
-            else:
+                # # Redirect user to the genarted OTP endpoint
+                # return(redirect(reverse('logger:OtpView', args=[endpoint])))
+            # else:
                 # If user doesnt have OTP enbled just log them in
-                login(self.request, user)
+            login(self.request, user)
         return super().form_valid(form)
 
 class AdminLoginView(LoginView):
@@ -455,85 +249,14 @@ class RegisterView(View):
       #    return(HttpResponseRedirect(reverse('logger:ProfileView')))
       return render(request, 'logger/views/tempRegisterView.html', {})
 
-# PROFILE VIEWS
-
-class ProfileView(SiteView):
-
-  def get(self, request):
-    context = {}
-    try:
-      # Retrive the Profile for the logged in user
-      patients = Patient.objects.filter(user_id = request.user.id)
-      connected_patients = Patient.objects.filter(connected = request.user.id)
-      context = { 'patients': patients,
-        'connected_patients': connected_patients}    
-    except Exception as e:
-      context = { 'error_message': str(e)}    
-    return render(request, 'logger/views/ProfileView.html', context)
-
-class ProfileUpdateView(SiteView):
-  
-  def get(self, request):
-    form = UserForm(instance=request.user)
-    context = {'form': form}
-    return render(request, 'logger/views/ProfileUpdateView.html', context)
-
-  def post(self, request):
-    form = UserForm(request.POST, instance=request.user)
-    if form.is_valid():
-      form.save()
-      return redirect('logger:ProfileView')
-    else:
-      return render(request, 'logger/views/ProfileUpdateView.html', {'form': form})
-
-class ProfileUpdatePasswordView(SiteView):
-
-  def get(self, request):
-    form = PasswordForm()
-    context = {'form': form}
-    return render(request, 'logger/views/ProfileUpdatePasswordView.html', context)
-
-  def post(self, request):
-    form = PasswordForm(request.POST)
-    if form.is_valid():
-      request.user.set_password(form.cleaned_data['password1'])
-      return redirect('logger:ProfileView')
-    else:
-      return render(request, 'logger/views/ProfileUpdatePasswordView.html', {'form': form})
-
-class ProfileSettingsView( SiteView, DetailView ):
-    '''View the details of a single log '''
-    model = Profile
-    permission_required = ('logger.view_log')
-    
-    def get_object(self):
-        user = self.request.user
-        return(get_object_or_404(Profile, user=user))
-
-class GraphView(SiteView, DetailView):
-  model = Patient
-  template_name_suffix = "_graphs"
-
-
-
-class ProfileSettingsUpdateView(SiteView, UpdateView):
-    ''' Edit a log. 
-                '''
-    model = Profile
-    fields = ["otp_enabled"]
-    template_name_suffix = '_update'
-    success_url = reverse_lazy('logger:ProfileSettingsView')
-    
-    def get_object(self):
-        user = self.request.user
-        return(get_object_or_404(Profile, user=user))
-   
-# DATA IO VIEWS
+# # DATA IO VIEWS
 
 class ExportView(SiteView):
   
   def get(self, request, pk):
-    pass
+      patient = get_object_or_404(Patient, pk=pk)
+      return render(request, 'logger/views/export_csv.html', {})
+
     
 class ImportView(SiteView):
     def post(self, request):
@@ -545,3 +268,35 @@ class ImportView(SiteView):
         context = {}
         return HttpResponse(template.render(context, request))
 
+class UploadCSV(SiteView):
+    template = 'logger/upload_csv.html'
+    
+    def get(self, request, pk):
+        patient = get_object_or_404(Patient, pk=pk)
+        form = UploadCSVForm()
+        return render(request, self.template, {'form': form, 'patient': patient})
+        
+    def post(self, request, pk):
+        patient = get_object_or_404(Patient, pk=pk)
+        form = UploadCSVForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+            decoded_file = csv_file.read().decode('utf-8').splitlines()
+            reader = csv.DictReader(decoded_file)
+            
+            user = request.user  # Assuming the current user is the uploader
+            
+            c = 0
+            s = 0
+
+            for row in reader:
+                if Log.create_from_csv_row(row, patient, user):
+                    c += 1
+                else:
+                    s += 1
+
+            messages.success(request, f'CSV file uploaded  {c} rows successfully!')
+            return render(request, self.template, {'form': UploadCSVForm(), 'patient': patient, 'row_count': c, 'skip_count': s})
+            #return redirect('logger:upload_csv', patient.id)  # Redirect to the same page after successful upload
+        return render(request, self.template, {'form': form, 'patient': patient})
+      

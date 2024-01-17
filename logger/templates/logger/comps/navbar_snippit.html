@@ -1,29 +1,50 @@
-<nav class="navbar">
-    <div class="navbar">
-      <a class="navbar" href="{% url 'logger:index' %}">Home</a>
-    
-      {% block page_links %}{% endblock %}
+
+<div class="navbar">
+    <table class="navbar">
+        <tr>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:index' %}">Home</a>
+            </td>
+        </tr>
+        
       {% if patient %}
-        <a class="navbar" href="{% url 'logger:PatientDetailView' patient.id%}">Patient Details</a>
-        <a class="navbar" href="{% url 'logger:LogListCreateView' patient.id%}">Patient Dashboard</a>
-        <a class="navbar" href="{% url 'logger:GraphView' patient.id%}">Patient Graphs</a>
+      <tr>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:PatientDetailView' patient.id%}">Details</a>
+            </td>
+            <td>
+                <a class="button-success" href="{% url 'logger:LogListCreateView' patient.id%}">Dashboard</a>
+            </td>
+        </tr>
+
       {% endif %}
-    </div>
-    
-    
-    {% if request.user.is_authenticated %}   
-    <div class="navbar">
-      <a class="navbar" href="{% url 'logger:ProfileView' %}">My Profile</a>
-      <a class="navbar" href="{% url 'logger:PatientListView' %}">My Patients</a>
-      <a class="navbar" href="{% url 'logger:LogoutView' %}">Logout</a>
-    </div>
+
+
+{% if request.user.is_authenticated %}
+        <tr>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:ProfileView' %}">My Profile</a>
+            </td>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:PatientListView' %}">My Patients</a>
+            </td>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:LogoutView' %}">Logout</a>
+            </td>
+
 {% else %}
-<div id="loginButton" class="m-0 p-1">
-        <a class="btn btn-light" href="{% url 'logger:RegisterView' %}">Sign up</a>
-    </div>
-    <div id="loginButton" class="m-0 p-1">
-        <a class="btn btn-light" href="{% url 'logger:LoginView' %}">Login</a>
-    </div>
+        <tr>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:RegisterView' %}">Sign up</a>
+            </td>
+            <td>
+                <a class="button-secondary" href="{% url 'logger:LoginView' %}">Login</a>
+            </td>
+
 {% endif %}
+        </tr>
+    </table>
     
-</nav>
+</div>
+
+

@@ -35,18 +35,18 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-import environ
-from twilio.rest import Client
-from .models import Log, Patient, DoseWindow, Otp, Profile, ExpressAccessToken
-from .forms import LoginForm, OtpForm, LogForm, UpdateLogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm, DoseWindowForm, ExpressAccessTokenForm, ExpressAccessLogForm
-from .plots import  ordinal, Chart
+from .models import Log, Patient, Dose, Profile, ExpressToken
+from .forms import LoginForm, LogForm, UpdateLogForm, PatientForm, CustomUserCreationForm, UserForm, PasswordForm, LinkUserForm, UnlinkUserForm, DoseForm, ExpressTokenForm, ExpressLogForm
 from django.core.mail import EmailMessage
 
-# reading .env file
-env = environ.Env()
-environ.Env.read_env()
-twilio_account_sid = env('TWILIO_ACCOUNT_SID')
-twilio_auth_token = env('TWILIO_AUTH_TOKEN')
+# Load credentials from .env file
+credentials = {}
+with open('/var/www/loewetechsoftware_com/loewetechsoftware_com/.env', 'r') as f:
+    for line in f:
+        key, var = line.strip('\n').split('=')
+        credentials[key] = var
+
+
 
 def render_error(request, message):
     '''
@@ -63,7 +63,7 @@ def render_express(request,token_str):
     '''
     # Get the token from db or send error
     try:
-        token = ExpressAccessToken.objects.get(token = token_str)
+        token = ExpressToken.objects.get(token = token_str)
         
         # get patient from token
         patient = token.patient
@@ -72,24 +72,24 @@ def render_express(request,token_str):
         logs = Log.objects.filter(patient_id = patient.id, steps=None).order_by('-date')[:20]
         
         # populate new form with access token 
-        form = ExpressAccessLogForm(initial = {'patient' : patient, 
+        form = ExpressLogForm(initial = {'patient' : patient, 
                               'user': patient.user, 
                               'date': datetime.now(), 
                               'token': token.token})
                               
         # render
         context = {'patient': token.patient, 'form': form, 'log_list': logs}
-        return render(request, 'logger/ExpressAccess_add.html', context)
+        return render(request, 'logger/Express_add.html', context)
 
         # Handle no token found
-    except ExpressAccessToken.DoesNotExist:
+    except ExpressToken.DoesNotExist:
         return render_error(request, f"Token not found: {token_str}")
 
-class ExpressAccessGenericView(View):
+class ExpressGenericView(View):
     
     def generate_token_form(self, token, Form):
         '''
-            takes a token db object and populates the ExpressAccessAddForm
+            takes a token db object and populates the ExpressAddForm
             with info.
         '''
         # get patient from token
@@ -116,22 +116,22 @@ class ExpressAccessGenericView(View):
         
 
 
-class ExpressAccessView(ExpressAccessGenericView):
+class ExpressView(ExpressGenericView):
     '''
         Entry point for the express access system. This route servers
         the client side script that then submits the access token
     '''
     def get(self, request):
         # server the js snippit that will post token to this endpoint
-        form = ExpressAccessTokenForm()
+        form = ExpressTokenForm()
         context = {'form': form}
-        return render(request, 'logger/ExpressAccess.html', context)
+        return render(request, 'logger/Express.html', context)
     
     def post(self, request):
         # Handle token and send log form with user info
 
         # Validate form first
-        form = ExpressAccessTokenForm(request.POST)
+        form = ExpressTokenForm(request.POST)
         if form.is_valid():
             token_str = form.cleaned_data['token']
             
@@ -139,19 +139,19 @@ class ExpressAccessView(ExpressAccessGenericView):
         else:
             return render_error("Invalid form")
 
-class ExpressAccessDeleteView(ExpressAccessGenericView):
+class ExpressDeleteView(ExpressGenericView):
     '''
         View a log
     '''
     def post(self, request, token, log):
         # Validate form first
-        form = ExpressAccessLogForm(request.POST)
+        form = ExpressLogForm(request.POST)
         if form.is_valid():
             token_str = form.cleaned_data['token']
             # retreive patient via access token
             try:
                 # get token object from db
-                token = ExpressAccessToken.objects.get(token = token_str)
+                token = ExpressToken.objects.get(token = token_str)
                 
                 # get log from database
                 log = Log.objects.get(log = log)
@@ -161,14 +161,14 @@ class ExpressAccessDeleteView(ExpressAccessGenericView):
                     log.delete()
                 
                 context = {'patient': token.patient, 'form': form}
-                return render(request, 'logger/ExpressAccess_add_confirm.html', context)
-            except ExpressAccessToken.DoesNotExist:
+                return render(request, 'logger/Express_add_confirm.html', context)
+            except ExpressToken.DoesNotExist:
                 return render_error(request, f"Token not found: {token_str}")
         else:
             context = {'patient': token.patient, 'form': form, 'error': 'Invalid Form'}
-            return render(request, 'logger/ExpressAccess_add_confirm.html', context)
+            return render(request, 'logger/Express_add_confirm.html', context)
 
-class ExpressAccessAddConfirmView(ExpressAccessGenericView):
+class ExpressAddConfirmView(ExpressGenericView):
     '''
         Recieve form from express access add log form and 
         validate. Then render confirmation screen.
@@ -176,23 +176,23 @@ class ExpressAccessAddConfirmView(ExpressAccessGenericView):
     def post(self, request):
 
         # Validate form first
-        form = ExpressAccessLogForm(request.POST)
+        form = ExpressLogForm(request.POST)
         if form.is_valid():
             token_str = form.cleaned_data['token']
             # retreive patient via access token
             print(token_str)
             try:
                 # get token object from db
-                token = ExpressAccessToken.objects.get(token = token_str)
+                token = ExpressToken.objects.get(token = token_str)
                 context = {'patient': token.patient, 'form': form, 'token': token_str}
-                return render(request, 'logger/ExpressAccess_add_confirm.html', context)
-            except ExpressAccessToken.DoesNotExist:
+                return render(request, 'logger/Express_add_confirm.html', context)
+            except ExpressToken.DoesNotExist:
                 return render_error(request, f"Token not found: {token_str}")
         else:
             context = {'patient': token.patient, 'form': form, 'error': 'Invalid Form'}
-            return render(request, 'logger/ExpressAccess_add_confirm.html', context)
+            return render(request, 'logger/Express_add_confirm.html', context)
 
-class ExpressAccessAddView(ExpressAccessGenericView):
+class ExpressAddView(ExpressGenericView):
     '''
         Entry point for the express access system. This route servers
         the client side script that then submits the access token
@@ -202,14 +202,14 @@ class ExpressAccessAddView(ExpressAccessGenericView):
     def post(self, request):
 
         # Validate form first
-        form = ExpressAccessLogForm(request.POST)
+        form = ExpressLogForm(request.POST)
         if form.is_valid():
             token_str = form.cleaned_data['token']
             # retreive patient via access token
             print(token_str)
             try:
                 # get token object from db
-                token = ExpressAccessToken.objects.get(token = token_str)
+                token = ExpressToken.objects.get(token = token_str)
                 
                 # Create and save new log
                 new_log = Log(patient = token.patient,
@@ -226,19 +226,19 @@ class ExpressAccessAddView(ExpressAccessGenericView):
                 # Send user back to Express Access Add screen 
                 
                 # Create populated form
-                form = self.generate_token_form(token, ExpressAccessLogForm)
+                form = self.generate_token_form(token, ExpressLogForm)
                 
                 # get recent patient logs 
                 logs = self.get_logs(token)
                 
                 # render
                 context = {'patient': token.patient, 'form': form, 'log_list': logs}
-                return render(request, 'logger/ExpressAccess_add.html', context)
+                return render(request, 'logger/Express_add.html', context)
                 
                               
-            except ExpressAccessToken.DoesNotExist:
+            except ExpressToken.DoesNotExist:
                 return render_error(request, f"Token not found: {token_str}")
 
-            return HttpResponseRedirect(reverse_lazy('logger:ExpressAccessView'))
+            return HttpResponseRedirect(reverse_lazy('logger:ExpressView'))
         else:
             return render_error("Invalid form")

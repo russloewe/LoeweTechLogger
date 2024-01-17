@@ -1,42 +1,60 @@
 {% extends "logger/base.html" %}
 
-
 {% block content %}
 
+<ul class="patient-box">
+  <li>
+    <h2>{{patient.first_name}} {{patient.last_name}}</h2>
+  </li>
 <div class="box-container">
-   
-<div class="card">
-    <div class="card-header">
-        <h2>{{patient.first_name}} {{patient.last_name}}</h2>
-    </div>
-    <div class="card-body">
-        {% include 'logger/comps/patient_card_snippit.html' %}
-    </div>
-    <div class="card-footer">
+      <ul>
+            <li>Birthday: {{patient.dob}}</li>
+            <li>Basal insulin dose: {{patient.basal_dose}}</li>
+            <li>User Account: {{ patient.user.username}}</li>
+            <li>
+                Connected Accounts: 
+                <ul>
+                    {% for user in patient.connected.all %}
+                        <li>{{user.username}}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li>
+                <table>
+                    <tr>
+                        <td>Average TDD:</td>
+                        <td>{{patient.getTDD.tdd}} units</td>
+                    </tr>
+                    <tr>
+                        <td>Suggested Basal min</td>
+                        <td>{{patient.getTDD.low}} units</td>
+                    </tr>
+                    <tr>
+                        <td>Suggested Basal max</td>
+                        <td>{{patient.getTDD.high}} units</td> 
+                    </tr>
+                </table>
+            </li>
+        </ul>
+     
+{% if express_url %}
+    <p>Express Access: <a href="{{ express_url }}">View Token</a></p>
+    <img src="data:image/png;base64, {{ express_qr_code }}" alt="Base64 Image">
+{% endif %}
 
-        <a href="{% url 'logger:PatientUpdateView' patient.id %}"
-            class="btn btn-secondary m-3">
-            Edit Patient
-        </a>
-        <a href="{% url 'logger:DoseWindowListCreateView' patient.id %}"
-           class="btn btn-secondary m-3">
-           Dose Windows
-        </a>
-        <a href="{% url 'logger:PatientLinkView' patient.id %}"
-           class="btn btn-secondary m-3">
-            Link Account
-        </a>
-        <a href="{% url 'logger:PatientUnlinkView' patient.id %}"
-           class="btn btn-secondary m-3">
-           Unlink Account
-        </a>
-        <a href="{% url 'logger:PatientDeleteView' patient.id %}"
-           class="btn btn-danger m-3">
-           Delete Patient
-        </a>
-    </div>
-</div>
 
-</div>
+  <li class="footer">
+    <a href="{% url 'logger:PatientUpdateView' patient.id %}" class="button-secondary">Edit Patient</a>
+    <a href="{% url 'logger:DoseListView' patient.id %}" class="button-secondary">Dose Windows</a>
+    <a href="{% url 'logger:GraphView' patient.id%}" class="button-secondary">Graphs</a>
+    <a href="{% url 'logger:PatientLinkView' patient.id %}" class="button-secondary">Link Account</a>
+    <a href="{% url 'logger:PatientUnlinkView' patient.id %}" class="button-secondary">Unlink Account</a>
+    <a href="{% url 'logger:PatientDeleteView' patient.id %}" class="button-danger">Delete Patient</a>
+    <a href="{% url 'logger:PatientLogExportView' patient.id %}" class="button-secondary">Export Logs</a>
+    <a href="{% url 'logger:upload_csv' patient.id %}" class="button-secondary">Import CSV Logs</a>
+  </li>
+</ul>
+
+
 
 {% endblock %}

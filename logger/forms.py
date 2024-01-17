@@ -19,7 +19,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import  login, logout, authenticate
 from django.core.exceptions import ValidationError
-from .models import Patient, Log, DoseWindow, Days, ExpressAccessToken
+from .models import Patient, Log, Dose, ExpressToken
 import datetime
 
 this_year = datetime.date.today().year
@@ -38,7 +38,7 @@ BIRTH_YEAR_CHOICES = [ str(year) for year in range(this_year, this_year-99, -1)]
 class LogForm(forms.ModelForm):
     class Meta:
         model = Log
-        fields = ["date", "bloodsugar", "carbs", "insulin", "basal",  "patient", "user", "notes"]
+        fields = ["date", "bloodsugar", "carbs", "insulin", "basal",  "patient", "user", "notes", "direction"]
         widgets = {
             'patient': forms.HiddenInput,
             'user': forms.HiddenInput
@@ -101,13 +101,17 @@ class UpdateLogForm(forms.ModelForm):
    #   'user': forms.HiddenInput
     }
 
-class DoseWindowForm(forms.ModelForm):
+
+class UploadCSVForm(forms.Form):
+    csv_file = forms.FileField()
+    
+class DoseForm(forms.ModelForm):
     class Meta:
-        model = DoseWindow
-        fields = ['patient', 'label', 'days', 'start', 'end', 'carb_ratio', 'correction_start', 'correction_step', 'active']
+        model = Dose
+        fields = ['patient', 'label',  'start', 'end', 'carb_ratio', 'correction_start', 'correction_step', 'active', 
+                  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         widgets = {
-            'patient': forms.HiddenInput,
-            'days' : forms.CheckboxSelectMultiple }
+            'patient': forms.HiddenInput}
 
 class UserForm(forms.ModelForm):
   class Meta:
@@ -124,14 +128,14 @@ class PatientForm(forms.ModelForm):
 class OtpForm(forms.Form):
     code = forms.CharField(label="Code")
     
-class ExpressAccessTokenForm(forms.Form):
+class ExpressTokenForm(forms.Form):
     token = forms.CharField(label="token", widget=forms.HiddenInput)
      # class Meta:
         # model = ExpressAccessToken
         # fields = [ "token"]
         # #widgets = {'token': forms.HiddenInput()}
 
-class ExpressAccessLogForm(LogForm, ExpressAccessTokenForm):
+class ExpressLogForm(LogForm, ExpressTokenForm):
     '''
         form to add new log using express access token.
     '''

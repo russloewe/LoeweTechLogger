@@ -5,6 +5,15 @@
   75% { left: 0; top: 140px;}
   100%{ left: 0; top: 0;}
 }
+/* Global Font Styling */
+html * {
+  font-size: 16px;
+  line-height: 1.625;
+  color: #2020131;
+  font-family: Nunito, sans-serif;
+}
+/* end Global Fonts */
+
 #loginButton{ animation: around 4s linear infinite;}
 
 h4 {
@@ -61,7 +70,24 @@ td.form-snippet {
 
 
 
+/* Navbar Snippet Styling */
 
+a.navbar {
+    color: white;
+    font-size: 10px;
+    border-radius: 4px;
+    background: blue;
+    padding: 2px 8px;
+    margin: 5px 2px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+}
+
+table.navbar > tr > td {
+    padding: 0px 0px;
+}
+
+/* end Navbar Snippet */
 
 
 
@@ -88,7 +114,7 @@ span {
 }
 
 @media only screen and (max-width: 480px) {
-    /* horizontal scrollbar for tables if mobile screen */
+    /* Styling changes for small screens */
     
     td:first-child {
       padding-left: 0px;
@@ -105,9 +131,10 @@ span {
 }
 
 /*
-color input background inputs
+*  Colors
 */
 
+/* Input colors */
 .bloodsugar{
    background: #ffaaaa;
 }
@@ -129,8 +156,36 @@ color input background inputs
 .basal{
     background: #aaaaaa
 }
+.arrow{
+    background: #ffccff;
+}
+ /* button colors */
+ 
+.success {
+    background: rgb(28, 184, 65);
+    /* this is a green */
+}
 
-/* end colors */
+.error,
+.danger {
+    background: rgb(202, 60, 60);
+    /* this is a maroon */
+}
+
+.warning {
+    background: rgb(223, 117, 20);
+    /* this is an orange */
+}
+
+.grey{
+    background: #aaaaaa
+}
+
+.secondary {
+    background: rgb(66, 184, 221);
+    /* this is a light blue */
+}
+/* end Colors */
 
 
 .stat-button{
@@ -152,11 +207,7 @@ border: solid black;
 
 /* Button Styling */
 
-.button-success,
-.button-error,
-.button-grey,
-.button-warning,
-.button-secondary {
+.button {
     color: white;
     border-radius: 4px;
     padding: 10px 8px;
@@ -167,29 +218,10 @@ border: solid black;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.button-success {
-    background: rgb(28, 184, 65);
-    /* this is a green */
-}
+a.button {
+    text-decoration: none;
+    }
 
-.button-error {
-    background: rgb(202, 60, 60);
-    /* this is a maroon */
-}
-
-.button-warning {
-    background: rgb(223, 117, 20);
-    /* this is an orange */
-}
-
-.button-grey{
-    background: #aaaaaa
-}
-
-.button-secondary {
-    background: rgb(66, 184, 221);
-    /* this is a light blue */
-}
 
 /* end Button */
 
@@ -213,9 +245,103 @@ h6.dose-helper {
 }
 
 input.dose-helper{
-    width: 40px;
+    width: 50px;
     margin: 0;
     font-size: 12pt;
 }
 
 /* end Dose Helper */
+ <style>  
+     
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background-color: #ccc;
+  margin: 10px 0;
+}
+
+h2 {
+  background-color: #f2f2f2;
+  padding: 10px;
+  margin: 0;
+  border-radius: 5px 5px 0 0;
+}
+
+h3 {
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+a:hover {
+  background-color: #0056b3;
+}
+
+.button-secondary {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.button-success {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.button-danger {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.button-warning {
+  background-color: #ffb433 ;
+  color: #fff;
+}
+
+.button-back {
+  background-color: #a6a6a6 ;
+  color: #fff;
+}
+
+.patient-box {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.footer {
+  background-color: #f2f2f2;
+  padding: 10px;
+  border-radius: 0 0 5px 5px;
+}

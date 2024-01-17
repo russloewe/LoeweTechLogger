@@ -10,8 +10,8 @@
       <form method="post" action="{% url 'logger:LogUpdateView' log.id %}" >
           {% include 'logger/comps/form_snippit.html' %}
           <div class="row">
-              <input class="button-warning pure-button" type="submit" value="Update">
-              <a class="button-grey pure-button" href="{% url 'logger:LogDetailView' log.id %}">Back</a>
+              <input class="button-secondary" type="submit" value="Update">
+              <a class="button-secondary" href="{% url 'logger:LogDetailView' log.id %}">Back</a>
           </div>
       </form>
       </div>

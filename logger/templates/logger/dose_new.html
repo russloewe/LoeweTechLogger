@@ -1,0 +1,31 @@
+
+{% extends "logger/base.html" %}
+
+
+{% block content %}
+{% include 'logger/scripts/time_format.html' %}
+
+<div class=" mx-auto">
+    <div class="card p-2">
+        <div class="card-header border">
+            <h3>New Dose</h3>
+            {% if error %}
+                <h3>Errors</h3>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'logger:DoseListView' patient.id %}">
+                {% csrf_token %}
+                    {% if form.errors %}
+                        {% include 'logger/comps/form_error_card.html' %}
+                        <h3>Errors</h3>
+                    {% endif %}
+                 {% include 'logger/comps/dosewindow_table.html' with dose=form %}
+                <div class="row">
+                    <input class="button-secondary pure-button" type="submit" value="Create">
+                    <a class="button-back" href="{% url 'logger:PatientDetailView' patient.id %}">Back</a>
+                </div>
+            </form>
+    </div>
+</div>
+{% endblock %}

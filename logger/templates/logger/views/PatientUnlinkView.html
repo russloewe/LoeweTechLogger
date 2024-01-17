@@ -13,8 +13,8 @@
         <form method="post" action="{% url 'logger:PatientUnlinkView' patient.id %}" >
             {% include 'logger/comps/form_snippit.html' %}
             <div class="row">
-                <input class="btn btn-primary m-3" type="submit" value="UnLink">
-                <a class='btn btn-secondary m-3' href="{% url 'logger:PatientDetailView' patient.id %}">Back</a>
+                <input class="button-secondary pure-button" type="submit" value="UnLink">
+                <a class="button-back" href="{% url 'logger:PatientDetailView' patient.id %}">Back</a>
             </div>
         </form>
         

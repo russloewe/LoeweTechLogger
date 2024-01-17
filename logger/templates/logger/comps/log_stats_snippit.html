@@ -88,6 +88,17 @@
                     </div>
                 </div>
                 {% endif %}
+                {% if log.direction %}
+                <div class="d-flex p-1">
+                    <div>
+                        <span class="text-dark p-1 m-0 rounded-left"
+                              style="background: #ffccff">arrows</span>
+                    </div>
+                    <div>
+                        <span class="border p-1 m-0 rounded-right">{{log.direction}}</span>
+                    </div>
+                </div>
+                {% endif %}
                 
                 {% if log.bp_high %}
                 <div class="d-flex p-1">
