@@ -31,9 +31,8 @@ cd ${APPSRC}
 #REMOTE_PASS=
 #APPDIR=/var/loewetechsoftware_com # Remote Directory for Django source code
 #APPSRC=/home/russell/Dropbox/loewetechsoftware_com # Location for local codebase
-#SSLDIR=/etc/apache2/ssl # Remote Directory for installing SSL keys
 #VENDIR=/var/venv_logger # Remote Directory for python virtual environment
-#DBDIR=/var/db_logger # DB directory for sqlite3 database
+
 
 run() {
 	echo 'running'
@@ -51,10 +50,14 @@ run() {
 	}
 
 # Do these commands on remote server to allow this script to run
+# 1) set root password:
 # sudo -s
 # passwd 
+# 2) enable root ssh login:
 # add 'PermitRootLogin yes' to /etc/ssh/sshd_config
 # sudo systemctl restart sshd
+#
+# 3) if this script still cant login try ssh from terminal and save host fingerprint then retry this script
 
 
 check_vars() {
@@ -133,8 +136,7 @@ InitSSHKeys () {
     fi
     
     echo "Checking remote login..."
-    echo $PASS
-    sshpass -p "$PASS" ssh root@$HOST 'ls' || { echo 'could not login as root'; echo 'try: sudo -s; passwd, or set "PermitRootLogin yes" in /etc/ssh/sshd_config' ; exit 1; }
+    sshpass -p "$PASS" ssh root@$HOST 'ls' || { echo 'could not login as root'; echo 'try: sudo -s; passwd, or set "PermitRootLogin yes" in /etc/ssh/sshd_config; also try ssh from terminal and save fingerprint' ; exit 1; }
     
     echo "Uploading pubilic SSH key for root"
     cd ~/.ssh/
@@ -148,8 +150,8 @@ InitSSHKeys () {
     echo "Restarting remote ssh daemon"
     sshpass -p "$PASS" ssh root@${HOST} 'systemctl restart sshd' 
     
-	#At this point we can use remote_command since we dont need sshpass
-	#Do this step last so we don't lock ourselves out of the server if there is a problem"
+	# At this point we can use remote_command since we dont need sshpass
+	# Do this step last so we don't lock ourselves out of the server if there is a problem
 	echo "Disabling password login"
     remote_command "sed -i '/PasswordAuthentication yes/d' /etc/ssh/sshd_config"
     
@@ -173,14 +175,17 @@ SetupFirewall () {
 InstallDependencies () {
     
     echo "Updating server"
-    #remote_command 'apt update'
-    #remote_command 'apt -y upgrade'
+    remote_command 'apt update'
+    remote_command 'apt -y upgrade'
     
     echo 'Installing packages'
     remote_command 'apt -y install apache2'
     remote_command 'apt -y install libapache2-mod-wsgi-py3'
     remote_command 'apt -y install python3.10-venv'
     remote_command 'apt -y install python3-pip'
+    remote_command 'apt -y install certbot'
+    remote_command 'apt -y install python3-certbot-apache'
+    remote_command 'apt -y install sysstat'
 
 }
 
