@@ -251,17 +251,15 @@ SetupLocalVenv () {
 # Step 6
 InitDB () {
 	
-	echo "Deleting old database: $DBDIR"
-	remote_command "rm -rf $DBDIR"
-	remote_command "mkdir $DBDIR"
-	
-    echo "Uploading database to remote host"
-    #upload_file ${DBDIR}/ ${APPSRC}/db/logger.db
-    upload_file ${DBDIR}/ ${DBDIR}/logger.db
+    echo "Uploading database dump file to $APPDIR/$DB_NAME.sql"
+    upload_file "$APPDIR" "$APPSRC/$DB_NAME.sql"
     
-    echo 'Setting permissions on database'
-    remote_command "chown www-data:www-data -R $DBDIR"
-    remote_command "chmod a+x -R $DBDIR"
+	echo "Restoring Database from $APPSRC/$DB_NAME.sql"
+    remote_command "psql -U $DB_NAME -d $DB_NAME -f $APPDIR/$DB_NAME.sql"
+    
+    echo "Removing database dumbfile"
+    remote_command "rm $APPDIR/$DB_NAME.sql"
+
 }
 
 InitLocalDB () {
@@ -345,11 +343,14 @@ SetupApache () {
 # Step 8
 SetupCertBot () {
     
-    echo 'Setting up CertBot'
-    remote_command  'apt-get -y install certbot python3-certbot-apache'
+    echo 'Stopping Apache server'
+    remote_command 'systemctl stop apache2'
     
     echo 'Starting certbot'
     remote_command 'certbot certonly --standalone'
+    
+    echo 'Restarting Apache server'
+    remote_command 'systemctl start apache2'
 }
 
 # Step 9
@@ -376,7 +377,7 @@ GetApacheErrorLogs () {
 }
 
 OpenPsql () {
-	
+
 	echo "Opening psql session on ${HOST}"
 	remote_command "sudo -u postgres psql"
 }
