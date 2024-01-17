@@ -15,6 +15,6 @@ sys.path.append('/var/www/loewetechsoftware_com')
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'loewetechsoftware_com.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'loewetechsoftware_com.settings_prod')
 
 application = get_wsgi_application()
