@@ -1,17 +1,3 @@
-# Misc
-
-## Dose calculation
-
-The dose calculation uses rates determined by the patients dose object. 
-The actual calculation is done by javascript functions defined in 
-
-		./logger/templates/logger/scripts/dose_helper.html
-		
-Dose corrections base on CGM arrows are determined by figure 4.3 of 
-
-	"A Practical Approach to Using Trend Arrows on the Dexcom G5 CGM System for the Management of Adults With Diabetes"
-
-of Journal of the Endocrine Society (Aleppo). [pubmed.ncbi.nlm.nih.gov/29344577](https://pubmed.ncbi.nlm.nih.gov/29344577/)
 
 #Installation
 
@@ -51,10 +37,6 @@ Do not us a sub directory of the app folder or updates to the server's code
 will wipe the database. Recomend using /var/db_loewetech
 
 
-##### APPSRC
-##### APPDIR
-##### HOST
-##### SSLDIR
 
 ## Setup Virtual Environment
 
@@ -69,29 +51,11 @@ then from the base path activate and install modules:
 
 ## Setup database
 
-###Option 1: sqlite
-
-To use a local sqlite database make sure this variable in the .env file
-    
-    USE_POSTGRESQL=False 
-    
-Then setup the database with the command
-
-	./manage.py migrate
-
-###Option 2: Setup Postrgesql server
-
-The details for the postgre server are in docker-compase.yaml
-Run the commands to start the server:
-
-    ./docker_compose pull
-    ./docker_compuse up
-
 setup postgresql to us password authentication add this line to 
 pg_hba.cong in postgresql etc folder:
 
-# TYPE  DATABASE        USER            ADDRESS                 METHOD
-local   all             loewetechsoftware                           md5
+    # TYPE  DATABASE        USER            ADDRESS                 METHOD
+    local   all             loewetechsoftware                           md5
 
 
 create a new database user    
@@ -133,6 +97,21 @@ First, shutdown the apache2 server. Then run this:
         
 then restart the apache2 server. It should download the certificate files to path specified in the apache .conf file. 
 If not make sure the path in the conf file matches where the certbot downloaded the ssl files.
+
+# Misc
+
+## Dose calculation
+
+The dose calculation uses rates determined by the patients dose object. 
+The actual calculation is done by javascript functions defined in 
+
+		./logger/templates/logger/scripts/dose_helper.html
+		
+Dose corrections base on CGM arrows are determined by figure 4.3 of 
+
+	"A Practical Approach to Using Trend Arrows on the Dexcom G5 CGM System for the Management of Adults With Diabetes"
+
+of Journal of the Endocrine Society (Aleppo). [pubmed.ncbi.nlm.nih.gov/29344577](https://pubmed.ncbi.nlm.nih.gov/29344577/)
 
 # Citations
 
