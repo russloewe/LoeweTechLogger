@@ -67,10 +67,6 @@ update password
     sudo -u postgres psql
     ALTER USER loewetechsoftware WITH PASSWORD 'new_password';
 
-## Backup sqlite database weekly on Sunday at midnight cron line :
-
-    0 0 * * 0 /home/russell/Dropbox/loewetechsoftware_com/scripts/backup_sqlite_db.sh  2>&1 > /home/russell/Dropbox/Docs/backup_db.log
-
 ## Backup Postgresql database 
 
 
@@ -81,7 +77,6 @@ update password
 ## Restore Postgresql Database
 
     createdb loewetechsoftware
-    pg_restore -U loewetechsoftware -d loewetechsoftware /home/russell/Dropbox/loewetechsoftware_com/loewetechsoftware.sql
     psql -U loewetechsoftware -d loewetechsoftware -f loewetechsoftware.sql
 
 Verify with 
