@@ -1,10 +1,23 @@
-
 #Installation
 
+This app is developed and deployed on ubuntu servers. 
+
+## Setup Firewall
+
+Enable the Ubuntu Server firewall with these UFW commands. 
+Only ports 80, 443 accept public connections. 
+Port 9494 is for the development server and only accepts local network connections.
+
+    remote_command 'ufw allow from 10.0.0.0/24 to any port 22 proto tcp' 
+    remote_command 'ufw allow 80' 
+    remote_command 'ufw allow 443' 
+    remote_command 'ufw allow from 10.0.0.0/24 to any port 9494 proto tcp'
+    remote_command 'systemctl enable ufw'
+    remote_command 'ufw reload'
 
 ## Setup Environment variables
 
-First, the variables that both the setup script and the Django app require
+The variables that both the setup script and the Django app require
 are defined in the environment file:
 
 		loewetechsoftware_com/loewetechsoftware_com/.env
@@ -16,7 +29,6 @@ The variables are:
 
 Used by the django app. use long, random string
 
-
 ##### PASS
 
 Root password for remote server.
@@ -25,31 +37,31 @@ Root password for remote server.
 
 Password and username for remote server.
 
-##### DBDIR
-
-Directory where sqlite3 database file will be stored on the remote server
-when sqlite3 is used as the database backend.
-
 ##### VENDIR
 
 Directory where python3 virtual environment will be on the remote server. 
-Do not us a sub directory of the app folder or updates to the server's code
-will wipe the database. Recomend using /var/db_loewetech
 
 
 
 ## Setup Virtual Environment
 
+Use the path specified by VENDIR in the .env file. Default 'loewetech'.
 Setup a virtual environment with:
 
-        ./python3 -m venv venv
+        ./python3 -m venv /var/venv/loewetech
 
 then from the base path activate and install modules:
 
-        source /path/to/venv/bin/activate
+        source /var/venv/loewetech/bin/activate
         pip install -r requirements.
 
 ## Setup database
+
+Use Postgresql database server.
+Don't start with the local sqlite3 database.
+You'll have to migrate eventually so just usq PostgreSQL from git-go.
+
+### New Database
 
 setup postgresql to us password authentication add this line to 
 pg_hba.cong in postgresql etc folder:
@@ -67,30 +79,35 @@ update password
     sudo -u postgres psql
     ALTER USER loewetechsoftware WITH PASSWORD 'new_password';
 
-## Backup Postgresql database 
+### Backup Postgresql database 
 
+Run these commands directly on host server
 
     sudo -u postgres pg_dumpall > backup_filename.sql
 
     sudo -u postgres pg_dump loewetechsoftware > loewetechsoftware.sql
 
-## Restore Postgresql Database
+### Restore Postgresql Database
 
     createdb loewetechsoftware
     psql -U loewetechsoftware -d loewetechsoftware -f loewetechsoftware.sql
 
-Verify with 
-
-    psql -U your_username -d your_database_name
-
 
 ## Get SSL Certificate
 
-First, shutdown the apache2 server. Then run this:
+Shutdown the apache2 server.
+
+        systemctl stop apache2
+
+Then run this:
 
 		certbot certonly --standalone
         
-then restart the apache2 server. It should download the certificate files to path specified in the apache .conf file. 
+Then restart apache server
+
+        systemctl start apache2
+
+It should download the certificate files to path specified in the apache .conf file. 
 If not make sure the path in the conf file matches where the certbot downloaded the ssl files.
 
 # Misc
