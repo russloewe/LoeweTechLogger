@@ -1,0 +1,23 @@
+<!-- templates/registration/login.html -->
+{% extends "home/base.html" %}
+
+
+{% block content %}
+
+<div class="col">
+<div class="box-container ">
+    <div class="box">
+        <!-- Sign in -->
+        <h4 class="">Sign in</h4>
+         <form method="post" >
+            {% include 'account/form_snippit.html' %}
+            <!-- submit -->
+            <div class="">
+                 <input  type="submit"   value="login">
+            </div>                                                           
+        </form>
+        </div>
+</div>
+</div> <!-- card.// -->
+
+{% endblock %}
