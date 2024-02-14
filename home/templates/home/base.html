@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <!-- Disable double tap zoom iphone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=0"/>
+  <meta name="google-site-verification" content="xe0ekHJ5Hi7j8hsTxtV1TDCcMGDbeoIV9Zsrpe6zts8" />
+  
+  <!-- Include the Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/static/r_logo.svg">
+  
+  <!-- Include Styles -->
+  <style type="text/css" media="screen">
+        {% include 'home/style.css' %}
+  </style>
+    
+    {% block head %}
+        <title>{{title}}</title>
+        <meta name="description" content="{{meta_description}}">
+    {% endblock %}
+    
+</head>
+<body>
+
+<div class="container">
+    <div class="row"><!-- Navbar -->
+        {% include 'home/navbar.html' %}
+    </div>
+    
+
+    {% block content %}{% endblock %} 
+</div>
+
+<div class="container">
+<p>&copy; 2023 Russell Loewe</p>
+<p>russloewe@protonmail.com</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+/* General Styles */
+/* Media query for small screens */
+@media (max-width: 600px) {
+  h3 {
+    font-size: 14px;
+  }
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    color: #333;
+    margin: 0;
+}
+
+#audioPlayer {
+            width: 100%;
+            display: block;
+}
+
+#mediaPlayer {
+            width: 100%;
+            display: block;
+}
+.header {
+
+    text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+
+.comment-input {
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    /* resize: vertical; Allows vertical resizing */
+  }
+  
+image {
+    padding-left: 40 px;
+    margin-left: 40px;
+}
+
+.small-text {
+    font-size: 10px; 
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Section Styles */
+.content {
+    color: #1a1a1a;
+    text-decoration: none;
+    
+}
+
+.content-text{
+    text-indent: 20px;
+}
+
+.content div {
+    color: #1a1a1a;
+    text-decoration: none;
+    border: 1px solid #ddd; /* Add a border around each content div */
+    border-radius: 5px; /* Optional: Add rounded corners for a softer look */
+    margin-bottom: 20px; /* Add margin between content divs */
+    padding: 15px; /* Add padding inside each content div */
+}
+
+.content h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.content h2 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.content h4 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* Content Styles */
+.content p {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Link Styles */
+.content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.content a:hover {
+    text-decoration: underline;
+}
+
+/* Published/Private Indicator Styles */
+.published {
+    color: #28a745; /* Green color for published content */
+}
+
+.private {
+    color: #dc3545; /* Red color for private content */
+}
+
+
+

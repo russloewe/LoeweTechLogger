@@ -1,0 +1,46 @@
+<style type="text/css" media="screen">
+nav {
+  background-color: white;
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline-block;
+}
+
+nav ul li a {
+  display: block;
+  color: black;
+  padding: 10px 20px;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  nav ul li {
+    display: block;
+  }
+}
+</style>
+
+<nav>
+  <ul>
+    <li>
+        <a  href="{% url 'home:index' %}"  >
+                    <img src="/static/images/r_logo.svg"   alt='basic image of capital cursive r.'>
+        </a></li>
+
+    <li>
+        {% if user.is_authenticated %}
+            <a class="navbar" href="{% url 'account:logout' %}">Logout</a>
+        {% else %}
+            <a class="navbar" href="{% url 'account:login' %}">Login</a>
+        {% endif %}</li>
+  </ul>
+</nav>
+
+
