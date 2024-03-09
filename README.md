@@ -63,6 +63,12 @@ You'll have to migrate eventually so just usq PostgreSQL from git-go.
 
 ### New Database
 
+Create a new database from the command line with creatdb
+
+    sudo -u postgres creatdb loewetechsoftware
+    
+createdb is a command line tool, NOT an sql command in psql.
+
 setup postgresql to us password authentication add this line to 
 pg_hba.cong in postgresql etc folder:
 
@@ -78,6 +84,12 @@ update password
 
     sudo -u postgres psql
     ALTER USER loewetechsoftware WITH PASSWORD 'new_password';
+
+if there are issues with permissions make sure the user has the right permissions 
+for the database:
+
+    GRANT ALL PRIVILEGES ON DATABASE loewetechsoftware TO loewetechsoftware;
+
 
 ### Backup Postgresql database 
 
